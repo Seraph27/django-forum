@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 from random import randint
 
 from .models import *
@@ -27,3 +28,15 @@ def inc_age(request):
 	return render(request, 'rex_app/b.html', {
 		'people': Person.objects.all(),
 		})	 
+
+def question_detail(request, pk):
+
+	question = get_object_or_404(Question, pk=pk)
+
+	# answers = question.answer_set.all()
+
+	return render(request, 'rex_app/question_detail.html', {
+		'question': question,
+		'questions': Question.objects.all(),
+
+		}) 

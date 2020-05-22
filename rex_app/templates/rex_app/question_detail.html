@@ -1,0 +1,15 @@
+{% extends 'rex_app/base.html' %}
+
+{% block content %}
+	<h4>Question</h4>
+	{{question}}<br>
+
+	<h4>Answers</h4>
+	{% for answer in question.answer_set.all %}
+		{{answer.text}} has {{answer.upvotes}} upvotes! Accepted: {{answer.accepted}}<br>
+		{% for comment in answer.comment_set.all %}
+			--{{comment}}<br>	
+		{% endfor %}
+	{% endfor %}
+
+{% endblock content %}
