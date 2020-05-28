@@ -27,19 +27,21 @@
   </head>
 
   <body>
+    <nav class="navbar sticky-top navbar-dark bg-dark">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Questions
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              {% for question in questions %}
+                <a class="dropdown-item" href="{% url 'question_detail' question.pk %}">Question {{question.pk}}</span></a> 
+                  {# auto generate url :) #}
+            {% endfor %}  
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-     
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            {% for question in questions %}
-                <a class="nav-link" href="{% url 'question_detail' question.pk %}">Question {{question.pk}}</span></a> 
-                {# auto generate url :) #}
-            {% endfor %}
-
-          </li>          
-        </ul>
-
+          </div>
+        </li>
+      </ul>
     </nav>    
 
     {% block content %}

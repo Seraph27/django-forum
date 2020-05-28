@@ -1,15 +1,68 @@
 {% extends 'rex_app/base.html' %}
 
+<html>
 {% block content %}
-	<h4>Question</h4>
-	{{question}}<br>
+	<head>
+		<title>Question {{question.pk}}</title>
+	</head>
+
+	<div class="text-center">
+		<h3>Question</h3>
+		{{question}}<br>
+	</div>
 
 	<h4>Answers</h4>
+
+	 <table class="table table-dark table-striped table-bo">
+	 	<thead>
+		  <tr>
+		    <th>Accepted</th>
+		    <th>Upvotes</th>
+		    <th>Answer</th>
+		    <th class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="true" aria-controls="collapseExample">
+				    Click to see comments> </th>
+		  </tr>
+	 	</thead>
+
+	 	<tbody>
+		  {% for answer in question.answer_set.all %}
+		  <tr>
+		  	<td>{{answer.accepted}}</td>
+		  	<td>{{answer.upvotes}}</td>
+		  	<td>{{answer.text}}</td>
+				<div class="collapse" id="collapseExample">
+				  <div class="card card-body">
+				  	<td>
+					    {% for comment in answer.comment_set.all %}
+							<p>--{{comment}}</p><br>
+						{% endfor %}	  		
+				  	</td>
+				  </div>
+				</div>
+		  </tr>
+		  {% endfor %}	
+		</tbody> 		
+	</table> 
+
+
+
+
+	<ul>
 	{% for answer in question.answer_set.all %}
+		<li>
 		{{answer.text}} has {{answer.upvotes}} upvotes! Accepted: {{answer.accepted}}<br>
+		</li>
 		{% for comment in answer.comment_set.all %}
-			--{{comment}}<br>	
+			<li>
+			--{{comment}}<br>
+			</li>	
 		{% endfor %}
 	{% endfor %}
+	</ul>
+
+
+
+
 
 {% endblock content %}
+</html>
