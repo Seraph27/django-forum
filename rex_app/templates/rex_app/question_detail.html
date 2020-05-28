@@ -47,22 +47,6 @@
 
 
 
-	<ul>
-	{% for answer in question.answer_set.all %}
-		<li>
-		{{answer.text}} has {{answer.upvotes}} upvotes! Accepted: {{answer.accepted}}<br>
-		</li>
-		{% for comment in answer.comment_set.all %}
-			<li>
-			--{{comment}}<br>
-			</li>	
-		{% endfor %}
-	{% endfor %}
-	</ul>
-
-
-
-
 
 {% endblock content %}
 </html>
