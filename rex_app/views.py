@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django import forms
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
@@ -40,3 +41,84 @@ def question_detail(request, pk):
 		'questions': Question.objects.all(),
 
 		}) 
+
+# forms.BaseForm -> (forms.Form, forms.ModelForm)
+
+class QuestionForm(forms.ModelForm):
+	class Meta:
+		model = Question
+		fields = ['text']
+
+	# text = forms.CharField(widget=forms.Textarea)
+
+
+
+def create_question(request):
+
+	print('here:')
+	print(request.method)
+
+	if request.method == 'POST':
+
+		print(request.POST)
+
+		form = QuestionForm(request.POST)
+		# form is now BOUND
+
+		if form.is_valid():
+			# form is now valid
+			print(form.cleaned_data['text'])
+
+			form.save()
+
+			# Question.objects.create(text=form.cleaned_data['text'])
+
+			# q = Question(text=form.cleaned_data['text'])
+			# q.save()
+
+			print('good form')
+		else:
+			print('bad form')
+
+
+	else:
+		form = QuestionForm()
+
+	return render(request, 'rex_app/create_question.html', {
+		'form': form,
+	}) 
+
+
+
+class AnswerForm(forms.ModelForm):
+	class Meta:
+		model = Answer
+		fields = ['text', 'upvotes', 'accepted']
+
+
+def create_answer(request, question_pk):
+	if request.method == 'POST':
+
+		form = AnswerForm(request.POST)
+		# form is now BOUND
+
+		if form.is_valid():
+			# form is now valid
+
+			answer = form.save(commit=False)
+			answer.question = Question.objects.get(pk=question_pk)
+			answer.save()
+
+
+			print('good form')
+		else:
+			print('bad form')
+
+
+	else:
+		form = AnswerForm()
+
+	return render(request, 'rex_app/create_answer.html', {
+		'form': form,
+		'question_pk': question_pk,
+	}) 
