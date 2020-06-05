@@ -1,9 +1,10 @@
 {% extends 'rex_app/base.html' %}
 
-{% block content %}
+	{% block content %}
 	<head>
 		<title>Question {{question.pk}}</title>
 	</head>
+
 
 	<div class="text-center">
 		<h3>Question</h3>
@@ -34,7 +35,8 @@
 				  <div class="card card-body bg-dark">
 					    {% for comment in answer.comment_set.all %}
 							<p>--{{comment}}</p><br>
-						{% endfor %}	  		
+						{% endfor %}
+						<a href="{% url 'create_comment' answer.pk %}">Make a new comment</a>	  		
 				  </div>
 				</div>
 			</td>
@@ -46,9 +48,5 @@
 
 
 	<a href="{% url 'create_answer' question.pk %}">Make a new answer</a>
-
-
-
-
 
 {% endblock content %}

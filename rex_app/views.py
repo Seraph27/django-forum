@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django import forms
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
+from django.contrib import messages
 from random import randint
 
 from .models import *
@@ -39,6 +40,7 @@ def question_detail(request, pk):
 	return render(request, 'rex_app/question_detail.html', {
 		'question': question,
 		'questions': Question.objects.all(),
+		'answers': Answer.objects.all(),
 
 		}) 
 
@@ -49,42 +51,26 @@ class QuestionForm(forms.ModelForm):
 		model = Question
 		fields = ['text']
 
-	# text = forms.CharField(widget=forms.Textarea)
-
 
 
 def create_question(request):
 
-	print('here:')
-	print(request.method)
-
 	if request.method == 'POST':
 
-		print(request.POST)
-
 		form = QuestionForm(request.POST)
-		# form is now BOUND
 
 		if form.is_valid():
-			# form is now valid
-			print(form.cleaned_data['text'])
+			question = form.save()
+			messages.add_message(request, messages.SUCCESS, 'Question successfully created!')
+			return redirect('question_detail', pk=question.pk)
 
-			form.save()
-
-			# Question.objects.create(text=form.cleaned_data['text'])
-
-			# q = Question(text=form.cleaned_data['text'])
-			# q.save()
-
-			print('good form')
 		else:
-			print('bad form')
-
+			messages.add_message(request, messages.ERROR, 'Terrible form D; ')
 
 	else:
 		form = QuestionForm()
 
-	return render(request, 'rex_app/create_question.html', {
+	return render(request, 'rex_app/create_question.html', {	
 		'form': form,
 	}) 
 
@@ -122,3 +108,42 @@ def create_answer(request, question_pk):
 		'form': form,
 		'question_pk': question_pk,
 	}) 
+
+
+class CommentForm(forms.ModelForm):
+	class Meta:
+		model = Comment
+		fields = ['text']
+
+
+
+def create_comment(request, answer_pk):
+	if request.method == 'POST':
+
+		form = CommentForm(request.POST)
+		# form is now BOUND
+
+		if form.is_valid():
+			# form is now valid
+
+			comment = form.save(commit=False)
+			comment.answer = Answer.objects.get(pk=answer_pk)
+			comment.save()
+
+
+			print('good form')
+		else:
+			print('bad form')
+
+
+	else:
+		form = CommentForm()
+
+	return render(request, 'rex_app/create_comment.html', {
+		'form': form,
+		'answer_pk': answer_pk,
+	}) 
+
+
+
+
