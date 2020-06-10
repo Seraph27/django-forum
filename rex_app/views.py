@@ -86,19 +86,18 @@ def create_answer(request, question_pk):
 	if request.method == 'POST':
 
 		form = AnswerForm(request.POST)
-		# form is now BOUND
 
 		if form.is_valid():
-			# form is now valid
 
 			answer = form.save(commit=False)
 			answer.question = Question.objects.get(pk=question_pk)
 			answer.save()
+			messages.add_message(request, messages.SUCCESS, 'Answer successfully created!')
+			return redirect('question_detail', pk=question_pk)
 
 
-			print('good form')
 		else:
-			print('bad form')
+			messages.add_message(request, messages.ERROR, 'Terrible form D; ')
 
 
 	else:

@@ -11,42 +11,47 @@
 		{{question}}<br>
 	</div>
 
-	<h4>Answers</h4>
+	<div class="card">
+	  	<div class="card-header bg-dark text-white">
+	    	<h5>Answers</h5>
+	  	</div>
+	 </div>
+	{% for answer in question.answer_set.all %}
+		<div class="row">	
+			<div class="col-sm-2">
+				<div class"card">
+					<div class="card-header">
+						Upvotes: {{answer.upvotes}}
+					</div>
+				</div>
+			</div>
 
-	 <table class="table table-dark table-striped table-bordered">
-	 	<thead>
-		  <tr>
-		    <th>Accepted</th>
-		    <th>Upvotes</th>
-		    <th>Answer</th>
-		    <th class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="true" aria-controls="collapseExample">
-				    Click to see comments </th>
-		  </tr>
-	 	</thead>
+			<div class="col-sm-8">
+				<div class="card">
 
-	 	<tbody>
-		  {% for answer in question.answer_set.all %}
-		  <tr>
-		  	<td>{{answer.accepted}}</td>
-		  	<td>{{answer.upvotes}}</td>
-		  	<td>{{answer.text}}</td>
-		  	<td>
-				<div class="collapse" id="collapseExample">
-				  <div class="card card-body bg-dark">
+				{% if answer.accepted %}
+					<div class="card-header">
+				  	  	Accepted Answer!
+				  	</div>
+				{% endif %}
+
+				  	<div class="card-body">
+				    	<h5 class="card-title">{{answer.text}}</h5>
+
 					    {% for comment in answer.comment_set.all %}
 							<p>--{{comment}}</p><br>
 						{% endfor %}
-						<a href="{% url 'create_comment' answer.pk %}">Make a new comment</a>	  		
-				  </div>
+						<a href="{% url 'create_comment' answer.pk %}" class="btn btn-primary">Make a new comment</a>			    	
+				  	</div>
+
 				</div>
-			</td>
-		  </tr>
-		  {% endfor %}	
-		</tbody> 		
-	</table> 
+			</div>
+		</div>
+	{% endfor %}
 
 
 
-	<a href="{% url 'create_answer' question.pk %}">Make a new answer</a>
+	<a href="{% url 'create_answer' question.pk %}" class="btn btn-primary">Make a new answer</a>
+}
 
 {% endblock content %}
