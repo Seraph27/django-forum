@@ -113,27 +113,25 @@ class CommentForm(forms.ModelForm):
 	class Meta:
 		model = Comment
 		fields = ['text']
-
+\
 
 
 def create_comment(request, answer_pk):
 	if request.method == 'POST':
 
 		form = CommentForm(request.POST)
-		# form is now BOUND
 
 		if form.is_valid():
-			# form is now valid
 
 			comment = form.save(commit=False)
 			comment.answer = Answer.objects.get(pk=answer_pk)
 			comment.save()
+			messages.add_message(request, messages.SUCCESS, 'Comment successfully created!')			
+			return redirect('question_detail', pk=1)
 
 
-			print('good form')
 		else:
-			print('bad form')
-
+			messages.add_message(request, messages.ERROR, 'Terrible form D; ')
 
 	else:
 		form = CommentForm()

@@ -13,9 +13,10 @@
 
 	<div class="card">
 	  	<div class="card-header bg-dark text-white">
-	    	<h5>Answers</h5>
+	    	<h4>Answers&nbsp&nbsp&nbsp&nbsp<a href="{% url 'create_answer' question.pk %}" class="btn btn-primary">Make a new answer</a></h4>
 	  	</div>
-	 </div>
+	</div>
+
 	{% for answer in question.answer_set.all %}
 		<div class="row">	
 			<div class="col-sm-2">
@@ -51,7 +52,5 @@
 
 
 
-	<a href="{% url 'create_answer' question.pk %}" class="btn btn-primary">Make a new answer</a>
-}
 
 {% endblock content %}
