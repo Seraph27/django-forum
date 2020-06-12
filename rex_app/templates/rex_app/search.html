@@ -1,0 +1,27 @@
+{% extends 'rex_app/base.html' %}
+
+{% block content %}
+
+<p>
+	{% if not search_results_for_question and not search_results_for_answer %}
+		NO RESULTS
+	{% endif %}
+
+	{% for question in search_results_for_question %}
+		<a href="{% url 'question_detail' question.pk %}">{{question}}</a><br>
+	{% endfor %}
+
+
+	{% for answer in search_results_for_answer %}
+		<a href="{% url 'question_detail' answer.question.pk %}">{{answer}}</a><br>
+	{% endfor %}
+	
+
+
+</p>
+
+
+
+
+
+{% endblock content %}

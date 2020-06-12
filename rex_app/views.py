@@ -113,7 +113,7 @@ class CommentForm(forms.ModelForm):
 	class Meta:
 		model = Comment
 		fields = ['text']
-\
+
 
 
 def create_comment(request, answer_pk):
@@ -127,8 +127,8 @@ def create_comment(request, answer_pk):
 			comment.answer = Answer.objects.get(pk=answer_pk)
 			comment.save()
 			messages.add_message(request, messages.SUCCESS, 'Comment successfully created!')			
-			return redirect('question_detail', pk=1)
 
+			return redirect('question_detail', pk=comment.answer.question.pk)
 
 		else:
 			messages.add_message(request, messages.ERROR, 'Terrible form D; ')
@@ -140,6 +140,22 @@ def create_comment(request, answer_pk):
 		'form': form,
 		'answer_pk': answer_pk,
 	}) 
+
+def search(request):
+	if request.method == 'GET':
+
+		query = request.GET.get('searchbox')
+
+		search_results_for_question = Question.objects.filter(text__icontains=query)
+		search_results_for_answer = Answer.objects.filter(text__icontains=query)
+
+		return render(request, 'rex_app/search.html', {
+				'search_results_for_question': search_results_for_question,
+				'search_results_for_answer':search_results_for_answer,
+                'query': query,
+			})
+
+
 
 
 

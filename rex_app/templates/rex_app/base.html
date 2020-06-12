@@ -45,11 +45,17 @@
 
         </div>
       </li>
-      
+
       <li class="nav-item active">
         <a class="nav-link" href="{% url 'create_question' %}">Create Question</a>
       </li>
 
+      <li class="nav-item active">
+        <form action="{% url 'search' %}">
+          <input type="text" id="searchbox" name="searchbox"><br>
+          <input type="submit" value="Submit">
+        </form>
+       </li> 
     </ul>
   </div>
 </nav>
