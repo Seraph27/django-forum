@@ -2,11 +2,20 @@
 
 {% block content %}
 
-<form method="post" action="{% url 'create_question' %}">
-	{% csrf_token %}
-	{{form.as_p}}
 
-	<input type="submit" name="submit_mode" value="1">
-</form>
 
+
+<div class="card">
+  <div class="card-header text-center">
+    <h2 class="text-center">Create Question</h2>
+  </div>
+  <div class="card-body">
+	<form method="post" action="{% url 'create_question' %}">
+		{% csrf_token %}
+		{{form.as_p}}
+
+		<input type="submit" name="submit_mode" value="1">
+	</form>
+  </div>
+</div>
 {% endblock %}

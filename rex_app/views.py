@@ -156,7 +156,26 @@ def search(request):
 			})
 
 
+def upvote(request, answer_pk):
+	upvote = Answer.objects.get(pk=answer_pk)
+	upvote.upvotes += 1
+	upvote.save()
 
+	return redirect('question_detail', pk=upvote.question.pk)
+
+def downvote(request, answer_pk):
+	downvote = Answer.objects.get(pk=answer_pk)
+	downvote.upvotes -= 1
+	downvote.save()
+
+	return redirect('question_detail', pk=downvote.question.pk)
+
+def mark_accepted(request, answer_pk):
+	accept = Answer.objects.get(pk=answer_pk)
+	accept.accepted = True
+	accept.save()
+
+	return redirect('question_detail', pk=accept.question.pk)
 
 
 

@@ -6,45 +6,53 @@
 	</head>
 
 
-	<div class="text-center">
-		<h3>Question</h3>
+	<div class="card text-center bg-light">
+		<h3 class="bg-light">Question</h3>
 		{{question}}<br>
 	</div>
 
 	<div class="card">
-	  	<div class="card-header bg-dark text-white">
-	    	<h4>Answers&nbsp&nbsp&nbsp&nbsp<a href="{% url 'create_answer' question.pk %}" class="btn btn-primary">Make a new answer</a></h4>
+	  	<div class="card-header bg-light">
+	    	<h4>Answers&nbsp&nbsp&nbsp&nbsp<a href="{% url 'create_answer' question.pk %}" class="btn btn-outline-info">Make a new answer</a></h4>
 	  	</div>
 	</div>
 
 	{% for answer in question.answer_set.all %}
-		<div class="row">	
-			<div class="col-sm-2">
-				<div class"card">
-					<div class="card-header">
-						Upvotes: {{answer.upvotes}}
+		<div class="card mb-3 bg-light">
+			<div class="row no-gutters">	
+				<div class="col-sm-2 bg-light">
+					<div class"card">
+						<div class="card-header">
+							Upvotes: {{answer.upvotes}}
+						</div>
+
+						<div class="card-body">
+							<a class="btn btn-outline-success" href="{% url 'upvote' answer.pk %}" role="button">Upvote</a>
+							<a class="btn btn-outline-danger" href="{% url 'downvote' answer.pk %}" role="button">Downvote</a><br>
+							<a class="btn btn-outline-info" href="{% url 'accept' answer.pk %}" role="button">Mark Accepted</a>
+						</div>
 					</div>
 				</div>
-			</div>
 
-			<div class="col-sm-8">
-				<div class="card">
+				<div class="col-sm-8 bg-light">
+					<div class="card border-left">
 
-				{% if answer.accepted %}
-					<div class="card-header">
-				  	  	Accepted Answer!
-				  	</div>
-				{% endif %}
+					{% if answer.accepted %}
+						<div class="card-header tbg-light">
+					  	  	Accepted Answer!
+					  	</div>
+					{% endif %}
 
-				  	<div class="card-body">
-				    	<h5 class="card-title">{{answer.text}}</h5>
+					  	<div class="card-body bg-light">
+					    	<h5 class="card-title">{{answer.text}}</h5>
 
-					    {% for comment in answer.comment_set.all %}
-							<p>--{{comment}}</p><br>
-						{% endfor %}
-						<a href="{% url 'create_comment' answer.pk %}" class="btn btn-primary">Make a new comment</a>			    	
-				  	</div>
+						    {% for comment in answer.comment_set.all %}
+								<p>--{{comment}}</p><br>
+							{% endfor %}
+							<a href="{% url 'create_comment' answer.pk %}" class="btn btn-outline-info">Make a new comment</a>			    	
+					  	</div>
 
+					</div>
 				</div>
 			</div>
 		</div>

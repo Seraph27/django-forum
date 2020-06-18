@@ -11,6 +11,9 @@ urlpatterns = [
     path('comment/create/<int:answer_pk>', views.create_comment, name='create_comment'),
     path('question/<int:pk>', views.question_detail, name='question_detail'),
     path('search', views.search, name='search'),
+    path('upvote/<int:answer_pk>', views.upvote, name='upvote'),
+    path('downvote/<int:answer_pk>', views.downvote, name='downvote'),
+    path('accept/<int:answer_pk>', views.mark_accepted, name='accept'),
 
 
     

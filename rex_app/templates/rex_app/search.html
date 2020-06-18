@@ -2,23 +2,34 @@
 
 {% block content %}
 
-<p>
-	{% if not search_results_for_question and not search_results_for_answer %}
-		NO RESULTS
-	{% endif %}
 
-	{% for question in search_results_for_question %}
-		<a href="{% url 'question_detail' question.pk %}">{{question}}</a><br>
-	{% endfor %}
+<div class="card">
+  <div class="card-header bg-light">
+    <h2 class="text-center">Results</h2>
+  </div>
+  <div class="card-body">
+		<p class="card-text text-center">
+			{% if not search_results_for_question and not search_results_for_answer %}
+				NO RESULTS
+			{% endif %}
+		</p>
 
+		<p class="card-text">
+			<h4 class="text-center">Search by question:</h4><br>
+			{% for question in search_results_for_question %}
+				<a href="{% url 'question_detail' question.pk %}">{{question}}</a><br>
+			{% endfor %}
 
-	{% for answer in search_results_for_answer %}
-		<a href="{% url 'question_detail' answer.question.pk %}">{{answer}}</a><br>
-	{% endfor %}
-	
+		</p>
 
-
-</p>
+		<p class="card-text">
+			<h4 class="text-center">Search by answer:</h4><br>
+			{% for answer in search_results_for_answer %}
+				<a href="{% url 'question_detail' answer.question.pk %}">{{answer.text}}</a><br>
+			{% endfor %}
+		</p>
+  </div>
+</div>
 
 
 
