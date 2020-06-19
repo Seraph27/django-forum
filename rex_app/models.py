@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 # Create your models here.
 
+# TODO User field for Answer and Comment, update views, render users that answered questions etc
+
 class UserAttribute(models.Model):
 	user = models.OneToOneField(User, on_delete=models.PROTECT)
 	background_color = models.CharField(max_length=999)
