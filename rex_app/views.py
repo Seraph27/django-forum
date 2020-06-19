@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from random import randint
+from django.contrib.auth.decorators import login_required
 
 from .models import *
 
@@ -52,7 +53,7 @@ class QuestionForm(forms.ModelForm):
 		fields = ['text']
 
 
-
+@login_required
 def create_question(request):
 
 	if request.method == 'POST':
@@ -60,7 +61,9 @@ def create_question(request):
 		form = QuestionForm(request.POST)
 
 		if form.is_valid():
-			question = form.save()
+			question = form.save(commit=False)
+			question.asked_by = request.user
+			question.save()
 			messages.add_message(request, messages.SUCCESS, 'Question successfully created!')
 			return redirect('question_detail', pk=question.pk)
 
@@ -81,7 +84,7 @@ class AnswerForm(forms.ModelForm):
 		model = Answer
 		fields = ['text', 'upvotes', 'accepted']
 
-
+@login_required
 def create_answer(request, question_pk):
 	if request.method == 'POST':
 
@@ -115,7 +118,7 @@ class CommentForm(forms.ModelForm):
 		fields = ['text']
 
 
-
+@login_required
 def create_comment(request, answer_pk):
 	if request.method == 'POST':
 
@@ -141,6 +144,7 @@ def create_comment(request, answer_pk):
 		'answer_pk': answer_pk,
 	}) 
 
+@login_required
 def search(request):
 	if request.method == 'GET':
 
@@ -155,21 +159,27 @@ def search(request):
                 'query': query,
 			})
 
-
+@login_required
 def upvote(request, answer_pk):
-	upvote = Answer.objects.get(pk=answer_pk)
-	upvote.upvotes += 1
-	upvote.save()
 
+	upvote = get_object_or_404(Answer, pk=answer_pk)
+
+	if request.method == 'POST':
+		upvote.upvotes += 1
+		upvote.save()
+	
 	return redirect('question_detail', pk=upvote.question.pk)
 
+
+#add 404 and post request TODO
+@login_required
 def downvote(request, answer_pk):
 	downvote = Answer.objects.get(pk=answer_pk)
 	downvote.upvotes -= 1
 	downvote.save()
 
 	return redirect('question_detail', pk=downvote.question.pk)
-
+@login_required
 def mark_accepted(request, answer_pk):
 	accept = Answer.objects.get(pk=answer_pk)
 	accept.accepted = True

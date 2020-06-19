@@ -8,6 +8,7 @@
 
 	<div class="card text-center bg-light">
 		<h3 class="bg-light">Question</h3>
+		{{question.asked_by}}
 		{{question}}<br>
 	</div>
 
@@ -27,9 +28,20 @@
 						</div>
 
 						<div class="card-body">
-							<a class="btn btn-outline-success" href="{% url 'upvote' answer.pk %}" role="button">Upvote</a>
-							<a class="btn btn-outline-danger" href="{% url 'downvote' answer.pk %}" role="button">Downvote</a><br>
-							<a class="btn btn-outline-info" href="{% url 'accept' answer.pk %}" role="button">Mark Accepted</a>
+							<form method="post" action="{% url 'upvote' answer.pk %}">
+								{% csrf_token %}
+								<input class="btn btn-outline-success" type="submit" name="submit_mode" value="Upvote">
+							</form>
+
+							<form method="post" action="{% url 'downvote' answer.pk %}">
+								{% csrf_token %}
+								<input class="btn btn-outline-danger" type="submit" name="submit_mode" value="Downvote">
+							</form>
+
+							<form method="post" action="{% url 'accept' answer.pk %}">
+								{% csrf_token %}
+								<input class="btn btn-outline-info" type="submit" name="submit_mode" value="Mark Accepted">
+							</form>
 						</div>
 					</div>
 				</div>
