@@ -59,7 +59,7 @@
 
        {% if user.is_authenticated %}
          <li>User: {{ user.get_username }}</li>
-         <li>Color: {{ user.user_attribute.background_color }}</li>
+         <li>Color: {{ user.userattribute.background_color }}</li>
          <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
        {% else %}
          <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>   
