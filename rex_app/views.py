@@ -94,6 +94,7 @@ def create_answer(request, question_pk):
 
 			answer = form.save(commit=False)
 			answer.question = Question.objects.get(pk=question_pk)
+			answer.answered_by = request.user
 			answer.save()
 			messages.add_message(request, messages.SUCCESS, 'Answer successfully created!')
 			return redirect('question_detail', pk=question_pk)
@@ -128,6 +129,7 @@ def create_comment(request, answer_pk):
 
 			comment = form.save(commit=False)
 			comment.answer = Answer.objects.get(pk=answer_pk)
+			comment.commented_by = request.user
 			comment.save()
 			messages.add_message(request, messages.SUCCESS, 'Comment successfully created!')			
 
@@ -171,22 +173,26 @@ def upvote(request, answer_pk):
 	return redirect('question_detail', pk=upvote.question.pk)
 
 
-#add 404 and post request TODO
 @login_required
 def downvote(request, answer_pk):
-	downvote = Answer.objects.get(pk=answer_pk)
-	downvote.upvotes -= 1
-	downvote.save()
+	downvote = get_object_or_404(Answer, pk=answer_pk)
 
+	if request.method == 'POST':
+		downvote.upvotes -= 1
+		downvote.save()
+	
 	return redirect('question_detail', pk=downvote.question.pk)
+
+
 @login_required
 def mark_accepted(request, answer_pk):
-	accept = Answer.objects.get(pk=answer_pk)
-	accept.accepted = True
-	accept.save()
+	accept = get_object_or_404(Answer, pk=answer_pk)
+
+	if request.method == 'POST':
+		accept.accepted = True
+		accept.save()
 
 	return redirect('question_detail', pk=accept.question.pk)
-
 
 
 # new views / templates etc for any UserAttributes

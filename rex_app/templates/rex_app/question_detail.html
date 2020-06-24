@@ -1,6 +1,7 @@
 {% extends 'rex_app/base.html' %}
 
 	{% block content %}
+	{% load humanize %}
 	<head>
 		<title>Question {{question.pk}}</title>
 	</head>
@@ -8,8 +9,8 @@
 
 	<div class="card text-center bg-light">
 		<h3 class="bg-light">Question</h3>
-		{{question.asked_by}}
 		{{question}}<br>
+		<p style="text-align:right">Asked by {{question.asked_by}} {{question.date|naturaltime}}</p>
 	</div>
 
 	<div class="card">
@@ -57,11 +58,13 @@
 
 					  	<div class="card-body bg-light">
 					    	<h5 class="card-title">{{answer.text}}</h5>
+							<p style="text-align:right">Answered by {{answer.answered_by}} {{answer.date|naturaltime}}</p>
 
 						    {% for comment in answer.comment_set.all %}
-								<p>--{{comment}}</p><br>
+								<p>{{comment}} --{{comment.commented_by}} {{comment.date}}</p><br>
 							{% endfor %}
-							<a href="{% url 'create_comment' answer.pk %}" class="btn btn-outline-info">Make a new comment</a>			    	
+							<a href="{% url 'create_comment' answer.pk %}" class="btn btn-outline-info">Make a new comment</a>	
+
 					  	</div>
 
 					</div>
