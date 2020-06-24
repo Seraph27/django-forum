@@ -13,6 +13,7 @@ def run():
 		user = User.objects.get(username='admin')		
 	except ObjectDoesNotExist:
 		user = User.objects.create_superuser('admin', 'admin@example.com', 'pass')
+		UserAttribute.objects.create(user=user, background_color='blue')
 
 	for i in range(5):
 
