@@ -1,0 +1,18 @@
+{% extends 'rex_app/base.html' %}
+
+{% block content %}
+
+
+<div class="card">
+  <div class="card-header text-center">
+    <h2 class="text-center">Change Color</h2>
+  </div>
+  <div class="card-body">
+  	<form method="post" action="{% url 'change_color' user.get_username %}">
+		{% csrf_token %}
+		{{form.as_p}}
+		<input type="submit" name="submit_mode" value="OK">
+	</form>
+  </div>
+</div>
+{% endblock %}

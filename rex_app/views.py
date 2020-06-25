@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from random import randint
 from django.contrib.auth.decorators import login_required
-
+from django.contrib.auth.models import User
 from .models import *
 
 # Create your views here.
@@ -194,5 +194,51 @@ def mark_accepted(request, answer_pk):
 
 	return redirect('question_detail', pk=accept.question.pk)
 
+@login_required
+def settings(request, username): #can i do this and not use it?? or is there other ways to do this
+
+	return render(request, 'rex_app/settings.html', {
+	
+	}) 
+
+class ChangeColorForm(forms.ModelForm):
+	class Meta:
+		model = UserAttribute
+		fields = ['background_color']
+
+
+@login_required
+def change_color(request, username):
+	user = get_object_or_404(User)
+
+	if request.method == 'POST':
+
+		form = ChangeColorForm(request.POST)
+
+		if form.is_valid(): 
+			print(user.userattribute.background_color)
+			user = form.save(commit=False)
+			user.background_color = form.cleaned_data['background_color']
+			user.save()
+			print(user.userattribute.background_color)
+			messages.add_message(request, messages.SUCCESS, 'Background color successfully updated!')
+			return redirect('settings', username=username)
+
+		else:
+			messages.add_message(request, messages.ERROR, 'Terrible form D; ')
+
+	else:
+		form = ChangeColorForm()
+
+	return render(request, 'rex_app/change_color.html', {	
+		'form': form,
+	}) 
+
+
 
 # new views / templates etc for any UserAttributes
+
+
+
+#Questions
+#whats the difference between User and user in models

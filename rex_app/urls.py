@@ -14,6 +14,8 @@ urlpatterns = [
     path('upvote/<int:answer_pk>', views.upvote, name='upvote'),
     path('downvote/<int:answer_pk>', views.downvote, name='downvote'),
     path('accept/<int:answer_pk>', views.mark_accepted, name='accept'),
+    path('settings/<username>', views.settings, name='settings'),
+    path('change_color/<username>', views.change_color, name='change_color'),
 
 
     

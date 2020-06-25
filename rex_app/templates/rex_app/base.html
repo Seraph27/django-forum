@@ -55,10 +55,12 @@
           <input type="text" id="searchbox" name="searchbox">
           <input class="btn btn-outline-info" type="submit" value="Submit">
         </form>
-       </li> 
+      </li> 
+
+      <li><a href="{% url 'settings' user.get_username %}">Settings</a></li>
 
        {% if user.is_authenticated %}
-         <li>User: {{ user.get_username }}</li>
+         <li>Logged in as: {{ user.get_username }}</li>
          <li>Color: {{ user.userattribute.background_color }}</li>
          <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
        {% else %}
