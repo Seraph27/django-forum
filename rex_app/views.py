@@ -195,7 +195,7 @@ def mark_accepted(request, answer_pk):
 	return redirect('question_detail', pk=accept.question.pk)
 
 @login_required
-def settings(request, username): #can i do this and not use it?? or is there other ways to do this
+def settings(request, user): #can i do this and not use it?? or is there other ways to do this
 
 	return render(request, 'rex_app/settings.html', {
 	
@@ -208,21 +208,23 @@ class ChangeColorForm(forms.ModelForm):
 
 
 @login_required
-def change_color(request, username):
-	user = get_object_or_404(User)
+def change_color(request, user):
 
 	if request.method == 'POST':
 
 		form = ChangeColorForm(request.POST)
 
-		if form.is_valid(): 
-			print(user.userattribute.background_color)
-			user = form.save(commit=False)
-			user.background_color = form.cleaned_data['background_color']
-			user.save()
-			print(user.userattribute.background_color)
+		if form.is_valid():
+			print(UserAttribute.objects)
+			print('LOL')
+			u = UserAttribute.objects.get(user=1)
+			u.background_color = form.cleaned_data['background_color']
+			u.save()
+			print(user)
+			print(form.cleaned_data)
+
 			messages.add_message(request, messages.SUCCESS, 'Background color successfully updated!')
-			return redirect('settings', username=username)
+			return redirect('settings', user=user)
 
 		else:
 			messages.add_message(request, messages.ERROR, 'Terrible form D; ')
