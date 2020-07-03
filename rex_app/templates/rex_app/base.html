@@ -57,11 +57,11 @@
         </form>
       </li> 
 
-      <li><a href="{% url 'settings' user.get_username %}">Settings</a></li>
+      <li><a href="{% url 'settings' user.pk %}">Settings</a></li>
 
        {% if user.is_authenticated %}
          <li>Logged in as: {{ user.get_username }}</li>
-         <li>Color: {{ user.userattribute.background_color }}</li>
+         <li>Color: {{ user.userattribute.get_background_color_display }}</li>
          <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
        {% else %}
          <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>   

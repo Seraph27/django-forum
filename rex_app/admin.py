@@ -11,7 +11,10 @@ class AnswerAdmin(admin.ModelAdmin):
 	pass
 class CommentAdmin(admin.ModelAdmin):
 	pass
+class DirectMessageAdmin(admin.ModelAdmin):
+	pass	
 admin.site.register(UserAttribute, UserAttributeAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(Comment, CommentAdmin)
+admin.site.register(DirectMessage, DirectMessageAdmin)

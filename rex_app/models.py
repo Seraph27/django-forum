@@ -4,9 +4,21 @@ from django.contrib.auth.models import User
 
 # TODO User field for Answer and Comment, update views, render users that answered questions etc
 
+class Colors(models.IntegerChoices):
+    GREEN = 1, 'green'
+    BLUE = 2, 'blue'
+    
+class DirectMessage(models.Model):
+	from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='from_user_reverse')
+	to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='to_user_reverse')
+	text = models.CharField(max_length=99999)
+
+	def __str__(self):
+		return str(self.from_user)+'>'+str(self.to_user)+' '+self.text
+
 class UserAttribute(models.Model):
 	user = models.OneToOneField(User, on_delete=models.PROTECT)
-	background_color = models.CharField(max_length=999)
+	background_color = models.IntegerField(choices=Colors.choices)
 
 
 class Question(models.Model):

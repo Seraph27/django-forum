@@ -5,3 +5,6 @@ python manage.py runserver
 admin
 relationships
 filters
+
+
+https://docs.djangoproject.com/en/3.0/topics/class-based-views/generic-display/

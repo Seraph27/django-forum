@@ -61,7 +61,7 @@
 							<p style="text-align:right">Answered by {{answer.answered_by}} {{answer.date|naturaltime}}</p>
 
 						    {% for comment in answer.comment_set.all %}
-								<p>{{comment}} --{{comment.commented_by}} {{comment.date}}</p><br>
+								<p>{{comment}} --{{comment.commented_by}} {{comment.date|naturaltime}}</p><br>
 							{% endfor %}
 							<a href="{% url 'create_comment' answer.pk %}" class="btn btn-outline-info">Make a new comment</a>	
 
