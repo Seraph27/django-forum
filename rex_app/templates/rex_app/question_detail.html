@@ -9,6 +9,7 @@
 
 	<div class="card text-center bg-light">
 		<h3 class="bg-light">Question</h3>
+        <h4 class="text-right">&nbsp&nbsp&nbsp&nbsp<a href="{% url 'edit_question' question.pk %}" class="btn btn-outline-info btn-sm">Edit question</a></h4>			  			  	
 		{{question}}<br>
 		<p style="text-align:right">Asked by {{question.asked_by}} {{question.date|naturaltime}}</p>
 	</div>
@@ -31,17 +32,17 @@
 						<div class="card-body">
 							<form method="post" action="{% url 'upvote' answer.pk %}">
 								{% csrf_token %}
-								<input class="btn btn-outline-success" type="submit" name="submit_mode" value="Upvote">
+								<input class="btn btn-outline-success btn-sm" type="submit" name="submit_mode" value="Upvote">
 							</form>
 
 							<form method="post" action="{% url 'downvote' answer.pk %}">
 								{% csrf_token %}
-								<input class="btn btn-outline-danger" type="submit" name="submit_mode" value="Downvote">
+								<input class="btn btn-outline-danger btn-sm" type="submit" name="submit_mode" value="Downvote">
 							</form>
 
 							<form method="post" action="{% url 'accept' answer.pk %}">
 								{% csrf_token %}
-								<input class="btn btn-outline-info" type="submit" name="submit_mode" value="Mark Accepted">
+								<input class="btn btn-outline-info btn-sm" type="submit" name="submit_mode" value="Mark Accepted">
 							</form>
 						</div>
 					</div>
@@ -50,11 +51,17 @@
 				<div class="col-sm-8 bg-light">
 					<div class="card border-left">
 
-					{% if answer.accepted %}
+
 						<div class="card-header tbg-light">
-					  	  	Accepted Answer!
+							{% if answer.accepted %}
+					  	  		Accepted Answer			
+							{% endif %}
+
+                            <h4 class="text-right"> &nbsp&nbsp&nbsp&nbsp<a href="{% url 'edit_answer' answer.pk %}" class="btn btn-outline-info btn-sm">Edit answer</a></h4>				  	  	
 					  	</div>
-					{% endif %}
+
+
+
 
 					  	<div class="card-body bg-light">
 					    	<h5 class="card-title">{{answer.text}}</h5>

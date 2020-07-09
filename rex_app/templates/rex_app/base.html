@@ -27,48 +27,56 @@
   </head>
 
   <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
 
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Questions
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
 
-          {% show_question_dropdown %}
 
-        </div>
-      </li>
 
-      <li class="nav-item active">
-        <a class="nav-link" href="{% url 'create_question' %}">Create Question</a>
-      </li>
 
-      <li class="nav-item active">
-        <form action="{% url 'search' %}">
-          <input type="text" id="searchbox" name="searchbox">
-          <input class="btn btn-outline-info" type="submit" value="Submit">
-        </form>
-      </li> 
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="nav-link btn btn-outline-secondary" href="{% url 'home' %}">Home</a>
 
-      <li><a href="{% url 'settings' user.pk %}">Settings</a></li>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-       {% if user.is_authenticated %}
-         <li>Logged in as: {{ user.get_username }}</li>
-         <li>Color: {{ user.userattribute.get_background_color_display }}</li>
-         <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
-       {% else %}
-         <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>   
-       {% endif %}        
-    </ul>
-  </div>
-</nav>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+
+          <li class="nav-item dropdown">
+            <a class="nav-link btn btn-outline-secondary btn-sm dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Questions
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+
+              {% show_question_dropdown %}
+
+            </div>
+          </li><br>
+
+          <li class="nav-item active">
+            <a class="nav-link btn btn-outline-secondary btn-sm" href="{% url 'create_question' %}">Create Question</a>
+          </li>
+
+          <li class="nav-item active">
+            <form action="{% url 'search' %}">
+              <input type="text" id="searchbox" name="searchbox">
+              <input class="btn btn-outline-info" type="submit" value="Submit">
+            </form>
+          </li> 
+
+          <li><a class="btn btn-outline-secondary btn-sm" href="{% url 'settings' 1 %}">Settings</a></li>
+
+           {% if user.is_authenticated %}
+             <li>Logged in as: {{ user.get_username }}</li>
+             <li>Color: {{ user.userattribute.get_background_color_display }}</li>
+             <li><a class="btn btn-outline-secondary btn-sm" href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
+           {% else %}
+             <li><a class="btn btn-outline-secondary btn-sm" href="{% url 'login'%}?next={{request.path}}">Login</a></li>   
+           {% endif %}        
+        </ul>
+      </div>
+    </nav>
 
 
 

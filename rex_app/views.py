@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import *
 
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, CreateView, UpdateView
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -39,26 +39,10 @@ class DirectMessageCreate(CreateView):
         return reverse('direct_message_list')
 
 # Create your views here.
-def index(request):
-    # return HttpResponse('<b>Welcome!</b>')
-    return render(request, 'rex_app/b.html', {
-        'sunny_today': True,
-        'a_big_number': 23094820394803948309,
-        'fruits': ['apple','banana','orange'],
-        'd': {'a': 1, 'b': 2},
-        })
+def home_detail(request):
+    return render(request,'rex_app/home.html', {
 
-def inc_age(request):
-
-    rex = Person.objects.get(first='r')
-
-    rex.age += 1
-
-    rex.save()
-
-    return render(request, 'rex_app/b.html', {
-        'people': Person.objects.all(),
-        })   
+        }) 
 
 def question_detail(request, pk):
 
@@ -105,12 +89,20 @@ def create_question(request):
         'form': form,
     }) 
 
+class EditQuestion(UpdateView):
+    model = Question
+    form_class = QuestionForm
 
+
+
+    def get_success_url(self):
+        messages.add_message(request, messages.SUCCESS, 'question successfully edited!')
+        return reverse('question_detail')  
 
 class AnswerForm(forms.ModelForm):
     class Meta:
         model = Answer
-        fields = ['text', 'upvotes', 'accepted']
+        fields = ['text']
 
 @login_required
 def create_answer(request, question_pk):
@@ -140,6 +132,32 @@ def create_answer(request, question_pk):
         'question_pk': question_pk,
     }) 
 
+@login_required
+def edit_answer(request, answer_pk):
+
+    answer = get_object_or_404(Answer, pk=answer_pk)
+
+    if request.method == 'POST':
+
+        form = AnswerForm(request.POST)
+
+        if form.is_valid() and request.user == answer.answered_by:
+
+            answer.text = form.cleaned_data['text']
+            answer.save()
+            messages.add_message(request, messages.SUCCESS, 'Answer successfully edited!')
+            return redirect('question_detail', pk=answer.question.pk)
+
+        else:
+            messages.add_message(request, messages.ERROR, 'dont you dare change someone elses answer')
+
+    else:
+        form = AnswerForm(instance=answer)        
+    return render(request, 'rex_app/edit_answer.html', {
+        'form': form,
+        'answer_pk': answer_pk,       
+
+    })        
 
 class CommentForm(forms.ModelForm):
     class Meta:
@@ -266,9 +284,3 @@ def change_color(request, user_pk):
 
 
 
-# new views / templates etc for any UserAttributes
-
-
-
-#Questions
-#whats the difference between User and user in models
