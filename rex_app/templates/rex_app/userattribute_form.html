@@ -7,8 +7,12 @@
     <h2 class="text-center">Settings</h2>
   </div>
   <div class="card-body">
-  	<p>{{user.userattribute.background_color}}</p>
-  	<a href="{% url 'change_color' user.pk %}" class="btn btn-outline-info">Change Color</a></h4>
+  	<form method="post" action="{% url 'settings' user.userattribute.pk %}">
+		{% csrf_token %}
+		{{form.as_p}}
+		<input type="submit" name="submit_mode" value="Submit">
+	</form>
+
   </div>
 </div>
 

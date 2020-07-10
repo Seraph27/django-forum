@@ -8,7 +8,7 @@
     <h2 class="text-center">Edit Question</h2>
   </div>
   <div class="card-body">
-	<form method="post" action="{% url 'question_detail' question.pk %}">
+	<form method="post" action="{% url 'edit_question' question.pk %}">
 		{% csrf_token %}
 		{{form.as_p}}
 		<input type="submit" name="submit_mode" value="Submit">

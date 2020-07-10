@@ -6,7 +6,9 @@ from django.shortcuts import get_object_or_404, reverse
 from django.contrib import messages
 from random import randint
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.auth.models import User
+from django.contrib.messages.views import SuccessMessageMixin
 from .models import *
 
 from django.views.generic import ListView, CreateView, UpdateView
@@ -89,15 +91,34 @@ def create_question(request):
         'form': form,
     }) 
 
-class EditQuestion(UpdateView):
+class EditQuestion(UserPassesTestMixin, UpdateView):
     model = Question
     form_class = QuestionForm
 
-
+    def test_func(self):
+        return self.request.user == self.get_object().asked_by 
 
     def get_success_url(self):
-        messages.add_message(request, messages.SUCCESS, 'question successfully edited!')
-        return reverse('question_detail')  
+        messages.add_message(self.request, messages.SUCCESS, 'question successfully edited!')
+        return reverse('question_detail', kwargs={'pk':self.get_object().pk}) 
+
+class UserAttributeForm(forms.ModelForm):
+    class Meta:
+        model = UserAttribute
+        fields = ['background_color']
+
+
+
+class EditUserAttributes(SuccessMessageMixin, UserPassesTestMixin, UpdateView):
+    model = UserAttribute
+    form_class = UserAttributeForm
+    success_message = "Settings updated"
+
+    def test_func(self):
+        return self.request.user == self.get_object().user 
+
+    def get_success_url(self):
+        return reverse('settings', kwargs={'pk':self.get_object().pk}) 
 
 class AnswerForm(forms.ModelForm):
     class Meta:
@@ -240,47 +261,47 @@ def mark_accepted(request, answer_pk):
 
     return redirect('question_detail', pk=accept.question.pk)
 
-@login_required
-def settings(request, user_pk): #can i do this and not use it?? or is there other ways to do this
+# @login_required
+# def settings(request):
 
-    return render(request, 'rex_app/settings.html', {
+#     return render(request, 'rex_app/settings.html', {
     
-    }) 
+#     }) 
 
-class ChangeColorForm(forms.ModelForm):
-    class Meta:
-        model = UserAttribute
-        fields = ['background_color']
+# class ChangeColorForm(forms.ModelForm):
+#     class Meta:
+#         model = UserAttribute
+#         fields = ['background_color']
 
 
-@login_required
-def change_color(request, user_pk):
+# @login_required
+# def change_color(request, user_pk):
 
-    user = get_object_or_404(User, pk=user_pk)  
-    ua = UserAttribute.objects.get(user=user)
+#     user = get_object_or_404(User, pk=user_pk)  
+#     ua = UserAttribute.objects.get(user=user)
     
-    if request.method == 'POST':
+#     if request.method == 'POST':
 
-        form = ChangeColorForm(request.POST)
+#         form = ChangeColorForm(request.POST)
 
-        if form.is_valid():
+#         if form.is_valid():
 
             
-            ua.background_color = form.cleaned_data['background_color']
-            ua.save()
+#             ua.background_color = form.cleaned_data['background_color']
+#             ua.save()
 
-            messages.add_message(request, messages.SUCCESS, 'Background color successfully updated!')
-            return redirect('settings', user_pk=user_pk)
+#             messages.add_message(request, messages.SUCCESS, 'Background color successfully updated!')
+#             return redirect('settings', user_pk=user_pk)
 
-        else:
-            messages.add_message(request, messages.ERROR, 'Terrible form D; ')
+#         else:
+#             messages.add_message(request, messages.ERROR, 'Terrible form D; ')
 
-    else:
-        form = ChangeColorForm(instance=ua)
+#     else:
+#         form = ChangeColorForm(instance=ua)
 
-    return render(request, 'rex_app/change_color.html', {   
-        'form': form,
-    })  
+#     return render(request, 'rex_app/change_color.html', {   
+#         'form': form,
+#     })  
 
 
 
