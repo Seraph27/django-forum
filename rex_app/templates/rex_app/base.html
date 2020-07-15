@@ -32,12 +32,8 @@
   <body>
 
 
-
-
-
-
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="nav-link btn btn-outline-secondary" href="{% url 'home' %}">Home</a>
+      <a class="nav-link btn btn-outline-info mr-4" href="{% url 'home' %}">Home</a>
 
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -47,7 +43,7 @@
         <ul class="navbar-nav mr-auto">
 
           <li class="nav-item dropdown">
-            <a class="nav-link btn btn-outline-secondary btn-sm dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <a class="nav-link" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               Questions
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -57,30 +53,32 @@
             </div>
           </li><br>
 
-          <li class="nav-item active">
-            <a class="nav-link btn btn-outline-secondary btn-sm" href="{% url 'create_question' %}">Create Question</a>
+          <li class="nav-item ">
+            <a class="nav-link" href="{% url 'create_question' %}">Create Question</a>
           </li>
 
-          <li class="nav-item active">
-            <form action="{% url 'search' %}">
-              <input type="text" id="searchbox" name="searchbox">
-              <input class="btn btn-outline-info" type="submit" value="Submit">
-            </form>
-          </li> 
 
           {% if user.userattribute %}
-            <li><a class="btn btn-outline-secondary btn-sm" href="{% url 'settings' user.userattribute.pk %}">Settings</a></li>  
+            <li class="nav-item"><a class="nav-link" href="{% url 'settings' user.userattribute.pk %}">Settings</a></li>  
           {% endif %}
           
 
            {% if user.is_authenticated %}
-             <li>Logged in as: {{ user.get_username }}</li>
-             <li>Color: {{ user.userattribute.get_background_color_display }}</li>
-             <li><a class="btn btn-outline-secondary btn-sm" href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
+             <li class="nav-item active"><a class="nav-link">Logged in as: {{ user.get_username }}</a></li>
+             {# <li class="nav-item active"><a class="nav-link">Color: {{ user.userattribute.get_background_color_display }}</a></li> #}
+             <li class="nav-item"><a class="nav-link" href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
            {% else %}
-             <li><a class="btn btn-outline-secondary btn-sm" href="{% url 'login'%}?next={{request.path}}">Login</a></li>   
-           {% endif %}        
+             <li class="nav-item"><a class="nav-link" href="{% url 'login'%}?next={{request.path}}">Login</a></li>   
+           {% endif %}     
+
         </ul>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active"><a class="nav-link mr-4">It is now: {{local_time}}<a></li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0" action="{% url 'search' %}">
+          <input class="form-control mr-sm-2" type="text" id="searchbox" placeholder="Search..." name="searchbox">
+          <input class="btn btn-outline-info" type="submit" value="Submit">
+        </form>          
       </div>
     </nav>
 

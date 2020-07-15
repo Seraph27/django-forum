@@ -66,12 +66,26 @@
 
 	}
 
-
+{% load humanize %}
 
 </style>
 
-<p>
-	<i class="fas fa-fire"></i>
-</p>
+<div class="card text-center bg-light">
+	<div class="card-header">
+		<h5>Recent Questions</h5>
+	</div>	
+	<ul class="list-group list-group-flush">
+		{% for recent in recents %}
+		    <li class="list-group-item"><a class="navbar-brand btn btn-link" href="{% url 'question_detail' recent.pk%}">{{recent}}</a><h5>Asked by: {{recent.asked_by}} {{recent.date|naturaltime}}</h5>
+			</li>
+		{% endfor %} 
+
+	</ul>		 				  		
+</div>
+
+
+{# <p> #}
+{# 	<i class="fas fa-fire"></i> #}
+{# </p> #}
 {% endblock content %}
 

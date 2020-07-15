@@ -1,6 +1,12 @@
+use the project in safety!
+
+can be done:
 homepage
-edit question/answer
-moderation
 direct message
+icons (fontawesome)
+
+maybe a bit difficult:
+moderation
+
+after we deploy:
 suggestion form - email to rex
-...

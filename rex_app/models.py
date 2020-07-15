@@ -20,7 +20,6 @@ class UserAttribute(models.Model):
 	user = models.OneToOneField(User, on_delete=models.PROTECT)
 	background_color = models.IntegerField(choices=Colors.choices)
 
-
 class Question(models.Model):
     text = models.CharField(max_length=99999)
     asked_by = models.ForeignKey(User, on_delete=models.PROTECT)

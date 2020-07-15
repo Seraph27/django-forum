@@ -15,7 +15,9 @@ from django.views.generic import ListView, CreateView, UpdateView
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-
+import datetime
+from pytz import timezone
+import pytz
 class DirectMessageList(ListView):
     model = DirectMessage
 
@@ -42,15 +44,23 @@ class DirectMessageCreate(CreateView):
 
 # Create your views here.
 def home_detail(request):
+    top_three_recent = Question.objects.all().order_by('-id')[:3]
+
+    utc_time = datetime.datetime.utcnow()
+    tz = timezone('Asia/Taipei')
+    local_time = str(tz.fromutc(utc_time))[:19]
+
+
     return render(request,'rex_app/home.html', {
 
+        'recents': top_three_recent,
+        'questions': Question.objects.all(),  
+        'local_time': local_time,     
         }) 
 
 def question_detail(request, pk):
 
     question = get_object_or_404(Question, pk=pk)
-
-    # answers = question.answer_set.all()
 
     return render(request, 'rex_app/question_detail.html', {
         'question': question,
