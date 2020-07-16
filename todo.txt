@@ -1,7 +1,7 @@
 use the project in safety!
 
 can be done:
-homepage
+homepage //
 direct message
 icons (fontawesome)
 

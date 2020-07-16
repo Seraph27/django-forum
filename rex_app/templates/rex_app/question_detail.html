@@ -11,7 +11,7 @@
 		<h3 class="bg-light">Question</h3>
         <h4 class="text-right">&nbsp&nbsp&nbsp&nbsp<a href="{% url 'edit_question' question.pk %}" class="btn btn-outline-info btn-sm">Edit question</a></h4>			  			  	
 		{{question}}<br>
-		<p style="text-align:right">Asked by {{question.asked_by}} {{question.date|naturaltime}}</p>
+		<p style="text-align:right">Asked by {{question.asked_by}}  <i class="{{user.userattribute.get_avatar_display}}"></i> {{question.date|naturaltime}}</p>
 	</div>
 
 	<div class="card">
@@ -65,10 +65,10 @@
 
 					  	<div class="card-body bg-light">
 					    	<h5 class="card-title">{{answer.text}}</h5>
-							<p style="text-align:right">Answered by {{answer.answered_by}} {{answer.date|naturaltime}}</p>
+							<p style="text-align:right">Answered by {{answer.answered_by}}  <i class="{{user.userattribute.get_avatar_display}}"></i> {{answer.date|naturaltime}}</p>
 
 						    {% for comment in answer.comment_set.all %}
-								<p>{{comment}} --{{comment.commented_by}} {{comment.date|naturaltime}}</p><br>
+								<p>{{comment}} --{{comment.commented_by}}  <i class="{{user.userattribute.get_avatar_display}}"></i> {{comment.date|naturaltime}}</p><br>
 							{% endfor %}
 							<a href="{% url 'create_comment' answer.pk %}" class="btn btn-outline-info">Make a new comment</a>	
 

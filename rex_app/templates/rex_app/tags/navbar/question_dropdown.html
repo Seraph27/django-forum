@@ -1,4 +1,5 @@
 {% for question in questions %}
     <a class="dropdown-item" href="{% url 'question_detail' question.pk %}">Question {{question.pk}}</a> 
       {# auto generate url :) #}
+
   {% endfor %}  

@@ -9,6 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
+from django.views.generic.edit import FormMixin
+from django.views.generic.list import MultipleObjectMixin
 from .models import *
 
 from django.views.generic import ListView, CreateView, UpdateView
@@ -18,27 +20,41 @@ from crispy_forms.layout import Submit
 import datetime
 from pytz import timezone
 import pytz
-class DirectMessageList(ListView):
+
+class DirectMessageList(ListView, MultipleObjectMixin):
     model = DirectMessage
 
-class DirectMessageForm(forms.ModelForm):
+    def get_queryset(self):
+        qs = super().get_queryset() 
+        
+        return DirectMessage.objects.filter(from_user=self.request.user)
+
+
+class DirectMessageForm(forms.ModelForm): 
     class Meta:
+
         model = DirectMessage
         fields = ['from_user', 'to_user', 'text']
-
+        # exclude = ['from_user']
+        # how to add default value for cbv??
+        
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs) 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_action = reverse('direct_message_create')
-        self.helper.add_input(Submit('submit', 'Submit'))   
+        self.helper.add_input(Submit('submit', 'Submit')) 
 
-class DirectMessageCreate(CreateView):
+
+class DirectMessageCreate(CreateView, FormMixin):
     model = DirectMessage
     form_class = DirectMessageForm
     # if dont specify form_class then fields is required
     # fields = ['from_user', 'to_user', 'text']
+    initial = {
+    'from_user': 'dick'
 
+    }
     def get_success_url(self):
         return reverse('direct_message_list')
 
@@ -115,7 +131,7 @@ class EditQuestion(UserPassesTestMixin, UpdateView):
 class UserAttributeForm(forms.ModelForm):
     class Meta:
         model = UserAttribute
-        fields = ['background_color']
+        fields = ['background_color', 'avatar']
 
 
 

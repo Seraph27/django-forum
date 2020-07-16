@@ -7,18 +7,31 @@ from django.contrib.auth.models import User
 class Colors(models.IntegerChoices):
     GREEN = 1, 'green'
     BLUE = 2, 'blue'
-    
-class DirectMessage(models.Model):
-	from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='from_user_reverse')
-	to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='to_user_reverse')
-	text = models.CharField(max_length=99999)
 
-	def __str__(self):
-		return str(self.from_user)+'>'+str(self.to_user)+' '+self.text
+class Avatars(models.TextChoices):
+    PX = 1, 'fab fa-500px'
+    ANGRY = 2, 'far fa-angry'
+    ANGRY = 2, '<i class="fas fa-backspace"></i>'
+    ANGRY = 2, '<i class="fas fa-atom"></i>'
+    ANGRY = 2, '<i class="fab fa-battle-net"></i>'
+    ANGRY = 2, '<i class="fas fa-biohazard"></i>'
+    ANGRY = 2, '<i class="fas fa-braille"></i>'
+    ANGRY = 2, '<i class="fas fa-burn"></i>'
+    ANGRY = 2, '<i class="fab fa-canadian-maple-leaf"></i>'
+    ANGRY = 2, '<i class="fas fa-car-crash"></i>'
+
+class DirectMessage(models.Model):
+    from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='from_user_reverse')
+    to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='to_user_reverse')
+    text = models.CharField(max_length=99999)
+
+    def __str__(self):
+    	return str(self.from_user)+'>'+str(self.to_user)+' '+self.text
 
 class UserAttribute(models.Model):
-	user = models.OneToOneField(User, on_delete=models.PROTECT)
-	background_color = models.IntegerField(choices=Colors.choices)
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
+    background_color = models.IntegerField(choices=Colors.choices)    
+    avatar = models.CharField(max_length=99999, choices=Avatars.choices)
 
 class Question(models.Model):
     text = models.CharField(max_length=99999)

@@ -62,9 +62,9 @@
             <li class="nav-item"><a class="nav-link" href="{% url 'settings' user.userattribute.pk %}">Settings</a></li>  
           {% endif %}
           
+          <li class="nav-item"><a class="nav-link" href="{% url 'direct_message_create' %}">Direct Messages</a></li>
 
            {% if user.is_authenticated %}
-             <li class="nav-item active"><a class="nav-link">Logged in as: {{ user.get_username }}</a></li>
              {# <li class="nav-item active"><a class="nav-link">Color: {{ user.userattribute.get_background_color_display }}</a></li> #}
              <li class="nav-item"><a class="nav-link" href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
            {% else %}
@@ -73,8 +73,13 @@
 
         </ul>
         <ul class="navbar-nav ml-auto">
+          {% if user.is_authenticated %}
+            <li class="nav-item active"><a class="nav-link">Logged in as: {{ user.get_username }} <i class="{{user.userattribute.get_avatar_display}}"></i></a></li>
+          {% endif %}
+
           <li class="nav-item active"><a class="nav-link mr-4">It is now: {{local_time}}<a></li>
         </ul>
+
         <form class="form-inline my-2 my-lg-0" action="{% url 'search' %}">
           <input class="form-control mr-sm-2" type="text" id="searchbox" placeholder="Search..." name="searchbox">
           <input class="btn btn-outline-info" type="submit" value="Submit">
