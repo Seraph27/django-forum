@@ -9,7 +9,7 @@
   </div>
   <div class="card-body">
 		<p class="card-text text-center">
-			{% if not search_results_for_question and not search_results_for_answer %}
+			{% if not search_results_for_question and not search_results_for_answer and not search_results_for_tag %}
 				NO RESULTS
 			{% endif %}
 		</p>
@@ -26,6 +26,12 @@
 			<h4 class="text-center">Search by answer:</h4><br>
 			{% for answer in search_results_for_answer %}
 				<a href="{% url 'question_detail' answer.question.pk %}">{{answer.text}}</a><br>
+			{% endfor %}
+		</p>
+		<p class="card-text">
+			<h4 class="text-center">Search by tags:</h4><br>
+			{% for tag in search_results_for_tag %}
+				<a href="{% url 'question_detail' tag.pk %}">{{tag}}</a><br>
 			{% endfor %}
 		</p>
   </div>

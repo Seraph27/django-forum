@@ -52,7 +52,7 @@ class DirectMessageCreate(CreateView, FormMixin):
     # if dont specify form_class then fields is required
     # fields = ['from_user', 'to_user', 'text']
     initial = {
-    'from_user': 'dick'
+    'from_user': 'f' #???????/
 
     }
     def get_success_url(self):
@@ -61,9 +61,9 @@ class DirectMessageCreate(CreateView, FormMixin):
 # Create your views here.
 def home_detail(request):
     top_three_recent = Question.objects.all().order_by('-id')[:3]
-
+    current_user = UserAttribute.objects.get(user=request.user)
+    tz = timezone(current_user.get_timezone_display())
     utc_time = datetime.datetime.utcnow()
-    tz = timezone('Asia/Taipei')
     local_time = str(tz.fromutc(utc_time))[:19]
 
 
@@ -90,7 +90,7 @@ def question_detail(request, pk):
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ['text']
+        fields = ['text', 'tag']
 
 
 @login_required
@@ -131,7 +131,9 @@ class EditQuestion(UserPassesTestMixin, UpdateView):
 class UserAttributeForm(forms.ModelForm):
     class Meta:
         model = UserAttribute
-        fields = ['background_color', 'avatar']
+        fields = ['background_color', 'avatar', 'birthday', 'timezone']
+
+
 
 
 
@@ -247,10 +249,12 @@ def search(request):
 
         search_results_for_question = Question.objects.filter(text__icontains=query)
         search_results_for_answer = Answer.objects.filter(text__icontains=query)
+        search_results_for_tag = Question.objects.filter(tag=query)
 
         return render(request, 'rex_app/search.html', {
                 'search_results_for_question': search_results_for_question,
                 'search_results_for_answer':search_results_for_answer,
+                'search_results_for_tag':search_results_for_tag, 
                 'query': query,
             })
 
