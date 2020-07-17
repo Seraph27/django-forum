@@ -10,7 +10,7 @@
 	<div class="card text-center bg-light">
 		<h3 class="bg-light">Question</h3>
         <h4 class="text-right">&nbsp&nbsp&nbsp&nbsp<a href="{% url 'edit_question' question.pk %}" class="btn btn-outline-info btn-sm">Edit question</a></h4>			  			  	
-		{{question}}<br>
+		{{question}} {{question.tag.all|join:','}}<br>
 		<p style="text-align:right">Asked by {{question.asked_by}}  <i class="{{user.userattribute.get_avatar_display}}"></i> {{question.date|naturaltime}}</p>
 	</div>
 

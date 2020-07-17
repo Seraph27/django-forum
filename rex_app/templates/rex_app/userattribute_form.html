@@ -16,5 +16,16 @@
   </div>
 </div>
 
-
 {% endblock content %}
+
+
+
+{% block extra_js %}
+
+<script>
+$( "#id_birthday" ).datepicker({
+  dateFormat: "yy-mm-dd"
+});
+</script>
+
+{% endblock extra_js %}

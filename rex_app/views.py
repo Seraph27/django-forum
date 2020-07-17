@@ -16,45 +16,56 @@ from .models import *
 from django.views.generic import ListView, CreateView, UpdateView
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
+from crispy_forms.layout import Submit, Layout, Fieldset, ButtonHolder
 import datetime
 from pytz import timezone
 import pytz
 
-class DirectMessageList(ListView, MultipleObjectMixin):
+class DirectMessageList(LoginRequiredMixin, ListView):
     model = DirectMessage
 
     def get_queryset(self):
         qs = super().get_queryset() 
         
-        return DirectMessage.objects.filter(from_user=self.request.user)
+        return qs.filter(from_user=self.request.user)
 
 
 class DirectMessageForm(forms.ModelForm): 
     class Meta:
 
         model = DirectMessage
-        fields = ['from_user', 'to_user', 'text']
-        # exclude = ['from_user']
-        # how to add default value for cbv??
-        
+        fields = ['to_user', 'text']
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs) 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_action = reverse('direct_message_create')
-        self.helper.add_input(Submit('submit', 'Submit')) 
+        self.helper.add_input(Submit('submit', 'Submit', css_class='btn-warning')) 
+        # self.helper.layout = Layout(
+        #     Fieldset(
+        #         'TITLE REX',
+        #         'to_user',
+        #         'text',
+        #     ),
+        #     ButtonHolder(
+        #         Submit('submit', 'Submit', css_class='button white')
+        #     )
+        # )
 
 
-class DirectMessageCreate(CreateView, FormMixin):
+class DirectMessageCreate(LoginRequiredMixin, CreateView):
     model = DirectMessage
     form_class = DirectMessageForm
     # if dont specify form_class then fields is required
     # fields = ['from_user', 'to_user', 'text']
-    initial = {
-    'from_user': 'f' #???????/
 
-    }
+    def form_valid(self, form):
+    # This method is called when valid form data has been POSTed.
+    # It should return an HttpResponse.
+        form.instance.from_user = self.request.user
+        return super().form_valid(form)
+
     def get_success_url(self):
         return reverse('direct_message_list')
 
@@ -68,7 +79,7 @@ def home_detail(request):
 
 
     return render(request,'rex_app/home.html', {
-
+        'python_tag':Tag.objects.get(text='python'),
         'recents': top_three_recent,
         'questions': Question.objects.all(),  
         'local_time': local_time,     
@@ -104,6 +115,7 @@ def create_question(request):
             question = form.save(commit=False)
             question.asked_by = request.user
             question.save()
+            form.save_m2m()
             messages.add_message(request, messages.SUCCESS, 'Question successfully created!')
             return redirect('question_detail', pk=question.pk)
 
@@ -137,7 +149,7 @@ class UserAttributeForm(forms.ModelForm):
 
 
 
-class EditUserAttributes(SuccessMessageMixin, UserPassesTestMixin, UpdateView):
+class EditUserAttributes(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
     model = UserAttribute
     form_class = UserAttributeForm
     success_message = "Settings updated"

@@ -67,11 +67,17 @@ class UserAttribute(models.Model):
     birthday=models.DateField(auto_now=False, null=True, blank=True)
     timezone=models.CharField(max_length=99999, choices=Timezone.choices)
 
+class Tag(models.Model):
+    text = models.CharField(max_length=20)
+    
+    def __str__(self):
+        return self.text[:200]
+
 class Question(models.Model):
     text = models.CharField(max_length=99999)
     asked_by = models.ForeignKey(User, on_delete=models.PROTECT)
     date = models.DateTimeField(auto_now_add=True)
-    tag = models.CharField(max_length=20, null=True)
+    tag = models.ManyToManyField(Tag)
 
     def __str__(self):
         return self.text[:200]
