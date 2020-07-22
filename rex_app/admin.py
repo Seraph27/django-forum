@@ -15,9 +15,12 @@ class DirectMessageAdmin(admin.ModelAdmin):
 	pass	
 class TagAdmin(admin.ModelAdmin):
 	pass	
+class FriendsAdmin(admin.ModelAdmin):
+	pass	
 admin.site.register(UserAttribute, UserAttributeAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(DirectMessage, DirectMessageAdmin)
 admin.site.register(Tag, TagAdmin)
+admin.site.register(Friends, FriendsAdmin)

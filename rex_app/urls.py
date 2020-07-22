@@ -16,7 +16,9 @@ urlpatterns = [
     path('downvote/<int:answer_pk>', views.downvote, name='downvote'),
     path('accept/<int:answer_pk>', views.mark_accepted, name='accept'),
     path('settings/<int:pk>', views.EditUserAttributes.as_view(), name='settings'),
-
+    path('friends/list', views.friends_list, name='friends_list'),
+    path('friends/add/<int:pk>', views.add_friend, name='add_friend'),
+    path('friends/remove/<int:pk>', views.remove_friend, name='remove_friend'),
     path('dm/list', views.DirectMessageList.as_view(), name='direct_message_list'),
     path('dm/create', views.DirectMessageCreate.as_view(), name='direct_message_create'),
 

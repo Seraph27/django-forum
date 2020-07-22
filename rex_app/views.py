@@ -17,9 +17,7 @@ from django.views.generic import ListView, CreateView, UpdateView
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Fieldset, ButtonHolder
-import datetime
-from pytz import timezone
-import pytz
+
 
 class DirectMessageList(LoginRequiredMixin, ListView):
     model = DirectMessage
@@ -73,16 +71,11 @@ class DirectMessageCreate(LoginRequiredMixin, CreateView):
 def home_detail(request):
     top_three_recent = Question.objects.all().order_by('-id')[:3]
     current_user = UserAttribute.objects.get(user=request.user)
-    tz = timezone(current_user.get_timezone_display())
-    utc_time = datetime.datetime.utcnow()
-    local_time = str(tz.fromutc(utc_time))[:19]
-
 
     return render(request,'rex_app/home.html', {
         'python_tag':Tag.objects.get(text='python'),
         'recents': top_three_recent,
-        'questions': Question.objects.all(),  
-        'local_time': local_time,     
+        'questions': Question.objects.all(),     
         }) 
 
 def question_detail(request, pk):
@@ -143,10 +136,7 @@ class EditQuestion(UserPassesTestMixin, UpdateView):
 class UserAttributeForm(forms.ModelForm):
     class Meta:
         model = UserAttribute
-        fields = ['background_color', 'avatar', 'birthday', 'timezone']
-
-
-
+        fields = ['background_color', 'avatar', 'birthday' ]
 
 
 class EditUserAttributes(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
@@ -159,6 +149,22 @@ class EditUserAttributes(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('settings', kwargs={'pk':self.get_object().pk}) 
+
+class FriendForm(forms.ModelForm):
+    class Meta:
+        model = Friends
+        fields = ['users']
+
+def friends_list(request):
+    friends = Friends.objects.get(current_user=request.user)
+    return render(request, 'rex_app/friends_list.html', {    
+        'friends': friends,
+    }) 
+
+def add_friend(request, pk):
+    pass
+def remove_friend(request, pk):
+    pass
 
 class AnswerForm(forms.ModelForm):
     class Meta:
@@ -261,7 +267,7 @@ def search(request):
 
         search_results_for_question = Question.objects.filter(text__icontains=query)
         search_results_for_answer = Answer.objects.filter(text__icontains=query)
-        search_results_for_tag = Question.objects.filter(tag=query)
+        search_results_for_tag = Tag.objects.filter(text=query)
 
         return render(request, 'rex_app/search.html', {
                 'search_results_for_question': search_results_for_question,

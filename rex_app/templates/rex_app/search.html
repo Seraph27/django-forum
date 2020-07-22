@@ -31,7 +31,9 @@
 		<p class="card-text">
 			<h4 class="text-center">Search by tags:</h4><br>
 			{% for tag in search_results_for_tag %}
-				<a href="{% url 'question_detail' tag.pk %}">{{tag}}</a><br>
+				{% for question in tag.question_set.all %}
+					<a href="{% url 'question_detail' question.pk %}">{{question}}</a><br>
+				{% endfor %}
 			{% endfor %}
 		</p>
   </div>

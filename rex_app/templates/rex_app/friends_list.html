@@ -1,0 +1,21 @@
+{% extends 'rex_app/base.html' %}
+
+
+
+{% block content %}
+
+<div class="card">
+	<div class="card-header text-center">
+		<h2 class="text-center">Friends</h2>
+	</div>
+	{% for friend in friends.users.all %}
+		{{friend.username}}
+	{% endfor %}
+	<!-- <a href="{% url 'direct_message_list' %}" class="btn btn-outline-info">Sent messages</a>	 -->
+
+	</div>
+
+</div>
+
+
+{% endblock content %}
