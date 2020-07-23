@@ -8,8 +8,8 @@
 
 <section>
 	<h1>Rex's comfy website</h1>
-	<h4>the more we know{{python_tag.question_set.all}}</h4>
-	
+	<h4>the more we know</h4>
+	<!-- {{python_tag.question_set.all}}	 -->
 </section>
 <div class="bg"></div>
 
@@ -74,7 +74,7 @@
 	</div>	
 	<ul class="list-group list-group-flush">
 		{% for recent in recents %}
-		    <li class="list-group-item"><a class="navbar-brand btn btn-link" href="{% url 'question_detail' recent.pk%}">{{recent}}</a><h5>Asked by: {{recent.asked_by}} {{recent.date|naturaltime}}</h5>
+			<li class="list-group-item"><a class="navbar-brand btn btn-link" href="{% url 'question_detail' recent.pk%}">{{recent}}</a><h5>Asked by: {{recent.asked_by}} {{recent.date|naturaltime}}</h5>
 			</li>
 		{% endfor %} 
 

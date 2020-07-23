@@ -35,9 +35,20 @@ class UserAttribute(models.Model):
     birthday=models.DateField(null=True, blank=True)
     is_moderator = models.BooleanField()
 
+
 class Friends(models.Model):
     users = models.ManyToManyField(User)
     current_user = models.ForeignKey(User, related_name='owner', null=True, on_delete=models.PROTECT)
+
+    @classmethod
+    def add_friend(cls, current_user, friend):
+        friend, created = cls.objects.get_or_create(current_user=current_user)
+        friend.users.add(friend)
+
+    @classmethod
+    def remove_friend(cls, current_user, friend):
+        friend, created = cls.objects.get_or_create(current_user=current_user)
+        friend.users.delete(friend)
 
 class Tag(models.Model):
     text = models.CharField(max_length=20)

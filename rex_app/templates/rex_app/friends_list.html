@@ -6,16 +6,38 @@
 
 <div class="card">
 	<div class="card-header text-center">
-		<h2 class="text-center">Friends</h2>
+		<h2 class="text-center">Current Friends</h2>
 	</div>
-	{% for friend in friends.users.all %}
+	<div class="card-body">
+		{% for friend in friends.users.all %}
 		{{friend.username}}
-	{% endfor %}
+		{% endfor %}
+	</div>
+
+	<div class="card-body">
+		<h2>all users</h2>
+		{% for user in users %}
+			<a class="nav-link" href="{% url 'profile' user.pk %}">{{user.username}}</a>
+		{% endfor %}
+	</div>
+	
 	<!-- <a href="{% url 'direct_message_list' %}" class="btn btn-outline-info">Sent messages</a>	 -->
 
 	</div>
-
+	<div class="card-body">
+		<form method="post" action="{% url 'add_friend' user.pk %}">
+			{% csrf_token %}
+			<input class="btn btn-outline-success btn-sm" type="submit" name="submit_mode" value="Add">
+		</form>
+	
+		<form method="post" action="{% url 'remove_friend' user.pk %}">
+			{% csrf_token %}
+			<input class="btn btn-outline-danger btn-sm" type="submit" name="submit_mode" value="Remove">
+		</form>
+	
+	</div>
 </div>
+
 
 
 {% endblock content %}

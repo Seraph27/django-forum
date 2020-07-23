@@ -68,6 +68,7 @@ class DirectMessageCreate(LoginRequiredMixin, CreateView):
         return reverse('direct_message_list')
 
 # Create your views here.
+@login_required
 def home_detail(request):
     top_three_recent = Question.objects.all().order_by('-id')[:3]
     current_user = UserAttribute.objects.get(user=request.user)
@@ -77,7 +78,7 @@ def home_detail(request):
         'recents': top_three_recent,
         'questions': Question.objects.all(),     
         }) 
-
+@login_required
 def question_detail(request, pk):
 
     question = get_object_or_404(Question, pk=pk)
@@ -150,22 +151,25 @@ class EditUserAttributes(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
     def get_success_url(self):
         return reverse('settings', kwargs={'pk':self.get_object().pk}) 
 
-class FriendForm(forms.ModelForm):
-    class Meta:
-        model = Friends
-        fields = ['users']
+class UserAttributeList(LoginRequiredMixin, ListView): #profile
+    model = UserAttribute   
 
 def friends_list(request):
     friends = Friends.objects.get(current_user=request.user)
+    users = User.objects.all()
     return render(request, 'rex_app/friends_list.html', {    
         'friends': friends,
+        'users': users,
     }) 
 
 def add_friend(request, pk):
-    pass
-def remove_friend(request, pk):
-    pass
+    friend = User.objects.get(pk=pk)
+    Friend.add_friend(request.user, friend)
 
+def remove_friend(request, pk):
+    friend = User.objects.get(pk=pk)
+    Friend.remove_friend(request.user, friend)
+    
 class AnswerForm(forms.ModelForm):
     class Meta:
         model = Answer

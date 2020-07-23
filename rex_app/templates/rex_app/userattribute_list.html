@@ -1,0 +1,24 @@
+{% extends 'rex_app/base.html' %}
+
+
+
+{% block content %}
+
+<div class="card">
+	<div class="card-header text-center">
+		<h2 class="text-center">Profile</h2>
+	</div>
+
+	<div class="card-body">
+		<h3>User: {{user.userattribute.user}}</h3>
+		<h3>Color: {{user.userattribute.get_background_color_display}}</h3>
+		<h3>{{avatar}}</h3>
+		
+
+		
+		
+	</div>
+</div>
+
+
+{% endblock content %}

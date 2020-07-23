@@ -21,7 +21,7 @@ urlpatterns = [
     path('friends/remove/<int:pk>', views.remove_friend, name='remove_friend'),
     path('dm/list', views.DirectMessageList.as_view(), name='direct_message_list'),
     path('dm/create', views.DirectMessageCreate.as_view(), name='direct_message_create'),
-
+    path('profile/<int:pk>', views.UserAttributeList.as_view(), name='profile')
     
 
 
