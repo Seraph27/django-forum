@@ -5,21 +5,23 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404, reverse
 from django.contrib import messages
 from random import randint
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin,PermissionRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic.edit import FormMixin
 from django.views.generic.list import MultipleObjectMixin
 from .models import *
 
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView
+from django.db import IntegrityError
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Fieldset, ButtonHolder
 
 
-class DirectMessageList(LoginRequiredMixin, ListView):
+class DirectMessageList(PermissionRequiredMixin, ListView):
+    permission_required = 'moderator'
     model = DirectMessage
 
     def get_queryset(self):
@@ -74,10 +76,11 @@ def home_detail(request):
     current_user = UserAttribute.objects.get(user=request.user)
 
     return render(request,'rex_app/home.html', {
-        'python_tag':Tag.objects.get(text='python'),
+        # 'python_tag':Tag.objects.get(text='python'),
         'recents': top_three_recent,
         'questions': Question.objects.all(),     
         }) 
+
 @login_required
 def question_detail(request, pk):
 
@@ -106,10 +109,13 @@ def create_question(request):
         form = QuestionForm(request.POST)
 
         if form.is_valid():
+            ua = get_object_or_404(UserAttribute, user=request.user)
             question = form.save(commit=False)
             question.asked_by = request.user
             question.save()
             form.save_m2m()
+            ua.reputation += 10
+            ua.save()
             messages.add_message(request, messages.SUCCESS, 'Question successfully created!')
             return redirect('question_detail', pk=question.pk)
 
@@ -151,25 +157,41 @@ class EditUserAttributes(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
     def get_success_url(self):
         return reverse('settings', kwargs={'pk':self.get_object().pk}) 
 
-class UserAttributeList(LoginRequiredMixin, ListView): #profile
-    model = UserAttribute   
+class Profile(LoginRequiredMixin, DetailView): #profile
+    model = UserAttribute  
+    template_name = 'rex_app/profile.html' 
 
+@login_required
 def friends_list(request):
-    friends = Friends.objects.get(current_user=request.user)
-    users = User.objects.all()
+    friends = FriendAdditionalDetail.objects.filter(user_attribute__user=request.user)
+    users = User.objects.exclude(username=request.user).exclude(userattribute__friendadditionaldetail__in=friends)  #how to remove added users.. 
     return render(request, 'rex_app/friends_list.html', {    
         'friends': friends,
         'users': users,
     }) 
+@login_required
+def add_friend(request, friend):
 
-def add_friend(request, pk):
-    friend = User.objects.get(pk=pk)
-    Friend.add_friend(request.user, friend)
+    my_attributes = UserAttribute.objects.get(user__username=request.user)   #user (in UserAttribute) >> username (in User) use ris in userattribute
+    friend_to_add = User.objects.get(username=friend)
+#check pair in friendadditional or don't create
+    try: 
+        FriendAdditionalDetail.objects.create(
+            user_attribute=my_attributes, user=friend_to_add, status=FriendStatus.APPROVED)
+    except IntegrityError:
+        messages.add_message(request, messages.ERROR, 'Cannot add friend: you already added ' + friend_to_add.username + ' as friend!')
+    return redirect('friends_list')
 
-def remove_friend(request, pk):
-    friend = User.objects.get(pk=pk)
-    Friend.remove_friend(request.user, friend)
-    
+@login_required
+def remove_friend(request, friend):
+
+    my_attributes = UserAttribute.objects.get(user__username=request.user)   #user (in UserAttribute) >> username (in User) use ris in userattribute
+    friend_to_remove = User.objects.get(username=friend)
+    FriendAdditionalDetail.objects.filter(user=friend_to_remove).delete()
+    messages.add_message(request, messages.ERROR, 'Removed ' + friend_to_remove.username + ' as friend!')
+
+    return redirect('friends_list')
+
 class AnswerForm(forms.ModelForm):
     class Meta:
         model = Answer
@@ -182,11 +204,13 @@ def create_answer(request, question_pk):
         form = AnswerForm(request.POST)
 
         if form.is_valid():
-
+            ua = get_object_or_404(UserAttribute, user=request.user)
             answer = form.save(commit=False)
             answer.question = Question.objects.get(pk=question_pk)
             answer.answered_by = request.user
             answer.save()
+            ua.reputation += 10
+            ua.save()
             messages.add_message(request, messages.SUCCESS, 'Answer successfully created!')
             return redirect('question_detail', pk=question_pk)
 
@@ -243,11 +267,13 @@ def create_comment(request, answer_pk):
         form = CommentForm(request.POST)
 
         if form.is_valid():
-
+            ua = get_object_or_404(UserAttribute, user=request.user)    
             comment = form.save(commit=False)
             comment.answer = Answer.objects.get(pk=answer_pk)
             comment.commented_by = request.user
             comment.save()
+            ua.reputation += 5
+            ua.save()
             messages.add_message(request, messages.SUCCESS, 'Comment successfully created!')            
 
             return redirect('question_detail', pk=comment.answer.question.pk)
@@ -280,7 +306,7 @@ def search(request):
                 'query': query,
             })
 
-@login_required
+@permission_required('voter')
 def upvote(request, answer_pk):
 
     upvote = get_object_or_404(Answer, pk=answer_pk)

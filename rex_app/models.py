@@ -4,6 +4,20 @@ from django.contrib.auth.models import User
 
 # TODO User field for Answer and Comment, update views, render users that answered questions etc
 
+class GlobalPermissions(models.Model):
+    class Meta:
+        managed = False
+
+        default_permissions = ()
+
+        permissions = (
+            ('moderator', 'Can moderate'),
+            ('voter', 'Can upvote/downvote'),
+            ('', ''),
+            # ('', ''),
+
+        )
+
 class Colors(models.IntegerChoices):
     GREEN = 1, 'green'
     BLUE = 2, 'blue'
@@ -33,22 +47,25 @@ class UserAttribute(models.Model):
     background_color = models.IntegerField(choices=Colors.choices)    
     avatar = models.CharField(max_length=99999, choices=Avatars.choices)
     birthday=models.DateField(null=True, blank=True)
-    is_moderator = models.BooleanField()
+    reputation = models.IntegerField(default=0)
+    friends = models.ManyToManyField(
+        User,
+        through='FriendAdditionalDetail', 
+        through_fields=('user_attribute', 'user'),
+        related_name='friends_reverse',
+        )
 
+class FriendStatus(models.IntegerChoices):
+    AWATING_APPROVAL = 1, 'AWATING_APPROVAL'
+    REJECTED = 2, 'REJECTED'
+    APPROVED = 3, 'APPROVED'
 
-class Friends(models.Model):
-    users = models.ManyToManyField(User)
-    current_user = models.ForeignKey(User, related_name='owner', null=True, on_delete=models.PROTECT)
-
-    @classmethod
-    def add_friend(cls, current_user, friend):
-        friend, created = cls.objects.get_or_create(current_user=current_user)
-        friend.users.add(friend)
-
-    @classmethod
-    def remove_friend(cls, current_user, friend):
-        friend, created = cls.objects.get_or_create(current_user=current_user)
-        friend.users.delete(friend)
+class FriendAdditionalDetail(models.Model):
+    class Meta:
+        unique_together = ('user_attribute', 'user')
+    user_attribute = models.ForeignKey(UserAttribute, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    status = models.IntegerField(choices=FriendStatus.choices)    
 
 class Tag(models.Model):
     text = models.CharField(max_length=20)

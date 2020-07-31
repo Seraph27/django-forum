@@ -9,6 +9,9 @@
 <section>
 	<h1>Rex's comfy website</h1>
 	<h4>the more we know</h4>
+	{% if perms.rex_app.moderator %}
+		<h5>HI</h5>
+	{% endif %}
 	<!-- {{python_tag.question_set.all}}	 -->
 </section>
 <div class="bg"></div>
