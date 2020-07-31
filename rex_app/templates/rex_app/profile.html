@@ -10,15 +10,19 @@
 	</div>
 
 	<div class="card-body">
+
 		<h3>User: {{object.user}}</h3>
 		<h3>Color: {{object.get_background_color_display}}</h3>
 		<h3>Avatar: <i class="{{object.get_avatar_display}}"></i></h3>
-		<h3>Reputation: {{object.reputation}}</h3>
-		
-
-		
-		
+		<h3>Reputation: {{object.reputation}}</h3>	
 	</div>
+	{% if object.user != request.user %}
+		<form method="post" action="{% url 'add_friend' object.user.pk %}">
+			{% csrf_token %}
+			<input class="btn btn-outline-success btn-sm" type="submit" name="submit_mode" value="Add">
+		</form>
+	{% endif %}
+
 </div>`
 
 

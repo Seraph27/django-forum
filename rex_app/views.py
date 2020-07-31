@@ -12,6 +12,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic.edit import FormMixin
 from django.views.generic.list import MultipleObjectMixin
 from .models import *
+from .reputation import upvote_allowed
 
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from django.db import IntegrityError
@@ -163,32 +164,45 @@ class Profile(LoginRequiredMixin, DetailView): #profile
 
 @login_required
 def friends_list(request):
-    friends = FriendAdditionalDetail.objects.filter(user_attribute__user=request.user)
-    users = User.objects.exclude(username=request.user).exclude(userattribute__friendadditionaldetail__in=friends)  #how to remove added users.. 
+    friends = FriendAdditionalDetail.objects.filter(status=FriendStatus.APPROVED, user_attribute__user=request.user)
+    friends_incoming_waiting_approval = FriendAdditionalDetail.objects.filter(status=FriendStatus.AWAITING_APPROVAL,user=request.user)
+    friends_rejected = FriendAdditionalDetail.objects.filter(status=FriendStatus.REJECTED, user_attribute__user=request.user)
+    friends_outgoing_waiting_approval = FriendAdditionalDetail.objects.filter(status=FriendStatus.AWAITING_APPROVAL,user_attribute__user=request.user)
     return render(request, 'rex_app/friends_list.html', {    
         'friends': friends,
-        'users': users,
+        'friends_incoming_waiting_approval': friends_incoming_waiting_approval,
+        'friends_rejected': friends_rejected,
+        'friends_outgoing_waiting_approval': friends_outgoing_waiting_approval,
     }) 
+
 @login_required
-def add_friend(request, friend):
+def add_friend(request, pk):
 
     my_attributes = UserAttribute.objects.get(user__username=request.user)   #user (in UserAttribute) >> username (in User) use ris in userattribute
-    friend_to_add = User.objects.get(username=friend)
+    friend_to_add = User.objects.get(pk=pk)
 #check pair in friendadditional or don't create
     try: 
         FriendAdditionalDetail.objects.create(
-            user_attribute=my_attributes, user=friend_to_add, status=FriendStatus.APPROVED)
+            user_attribute=my_attributes, user=friend_to_add, status=FriendStatus.AWAITING_APPROVAL)
     except IntegrityError:
         messages.add_message(request, messages.ERROR, 'Cannot add friend: you already added ' + friend_to_add.username + ' as friend!')
     return redirect('friends_list')
 
 @login_required
-def remove_friend(request, friend):
+def remove_friend(request, pk):
 
-    my_attributes = UserAttribute.objects.get(user__username=request.user)   #user (in UserAttribute) >> username (in User) use ris in userattribute
-    friend_to_remove = User.objects.get(username=friend)
-    FriendAdditionalDetail.objects.filter(user=friend_to_remove).delete()
-    messages.add_message(request, messages.ERROR, 'Removed ' + friend_to_remove.username + ' as friend!')
+    friend_to_remove = get_object_or_404(FriendAdditionalDetail, pk=pk)
+
+    friend_to_remove.delete()
+    messages.add_message(request, messages.ERROR, 'Removed ' + friend_to_remove.user.username + ' as friend!')
+
+    return redirect('friends_list')
+
+@login_required
+def accept_friend(request, pk):
+    friend_request = get_object_or_404(FriendAdditionalDetail, pk=pk)
+    friend_request.status = FriendStatus.APPROVED
+    friend_request.save()
 
     return redirect('friends_list')
 
@@ -306,14 +320,15 @@ def search(request):
                 'query': query,
             })
 
-@permission_required('voter')
+@login_required
 def upvote(request, answer_pk):
 
     upvote = get_object_or_404(Answer, pk=answer_pk)
 
     if request.method == 'POST':
-        upvote.upvotes += 1
-        upvote.save()
+        if upvote_allowed(request.user):
+            upvote.upvotes += 1
+            upvote.save()
     
     return redirect('question_detail', pk=upvote.question.pk)
 

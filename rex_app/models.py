@@ -56,7 +56,7 @@ class UserAttribute(models.Model):
         )
 
 class FriendStatus(models.IntegerChoices):
-    AWATING_APPROVAL = 1, 'AWATING_APPROVAL'
+    AWAITING_APPROVAL = 1, 'AWAITING_APPROVAL'
     REJECTED = 2, 'REJECTED'
     APPROVED = 3, 'APPROVED'
 
@@ -66,6 +66,12 @@ class FriendAdditionalDetail(models.Model):
     user_attribute = models.ForeignKey(UserAttribute, on_delete=models.PROTECT)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     status = models.IntegerField(choices=FriendStatus.choices)    
+
+    def save(self, *args, **kwargs):
+
+        if self.user_attribute.user == self.user:
+            raise ValidationError('chill')
+        super().save(*args, **kwargs)
 
 class Tag(models.Model):
     text = models.CharField(max_length=20)
