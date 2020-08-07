@@ -1,0 +1,21 @@
+{% extends 'rex_app/base.html' %}
+
+{% block content %}
+
+
+
+
+<div class="card">
+  <div class="card-header text-center">
+    <h2 class="text-center">Create Tag</h2>
+  </div>
+  <div class="card-body">
+  	<form method="post" action="{% url 'create_tag' %}">
+        {{form.as_p}}
+        {% csrf_token %}
+        <input class="btn btn-outline-success btn-sm" type="submit" name="submit_mode" value="Create New Tag">
+    </form>
+
+  </div>
+</div>
+{% endblock %}

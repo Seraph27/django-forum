@@ -19,8 +19,11 @@ class GlobalPermissions(models.Model):
         )
 
 class Colors(models.IntegerChoices):
-    GREEN = 1, 'green'
-    BLUE = 2, 'blue'
+    DARK = 1, '#212529'
+    BLUE = 2, '#001442'
+    GREEN = 3, '#00321b'
+
+    
 
 class Avatars(models.TextChoices):
     PX = 1, 'fab fa-500px'
@@ -37,6 +40,7 @@ class Avatars(models.TextChoices):
 class DirectMessage(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='from_user_reverse')
     to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='to_user_reverse')
+    time_stamp = models.DateTimeField(auto_now_add=True)
     text = models.CharField(max_length=99999)
 
     def __str__(self):
@@ -80,6 +84,7 @@ class Tag(models.Model):
         return self.text[:200]
 
 class Question(models.Model):
+    title = models.CharField(max_length=99)
     text = models.CharField(max_length=99999)
     asked_by = models.ForeignKey(User, on_delete=models.PROTECT)
     date = models.DateTimeField(auto_now_add=True)

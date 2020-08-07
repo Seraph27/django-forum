@@ -8,7 +8,12 @@
 	<div class="card-header text-center">
 		<h2 class="text-center">Friends</h2>
 	</div>
-
+	<div class="card-body">
+		<form class="form-inline my-2 my-lg-0" action="{% url 'search_for_user' %}">
+			<input class="form-control mr-sm-2" type="text" id="searchbox" placeholder="Search for user" name="searchbox">
+			<input class="btn btn-outline-info" type="submit" value="Submit">
+		</form>  
+	</div>
 	<div class="card-body">
 		<h2>Current Friends</h2>
 
@@ -19,19 +24,6 @@
 						<a href="{% url 'profile' friend.user.pk %}">{{friend.user.username}}</a>
 					</div>
 
-					<div class="col-1">
-						<form method="post" action="{% url 'add_friend' friend.user.pk %}">
-							{% csrf_token %}
-							<input class="btn btn-outline-success btn-sm" type="submit" name="submit_mode" value="Add">
-						</form>		
-					</div>
-		
-					<div class="col-1 ">
-						<form method="post" action="{% url 'remove_friend' friend.pk %}">
-							{% csrf_token %}
-							<input class="btn btn-outline-danger btn-sm" type="submit" name="submit_mode" value="Remove">
-						</form>
-					</div>
 				</div>
 			</div>	
 		{% endfor %}
@@ -40,7 +32,7 @@
 
 	
 	<div class="card-body">
-		<h2>Pending friends_incoming_waiting_approval</h2>
+		<h2>Incoming friend requests</h2>
 		{% for friend in friends_incoming_waiting_approval%}
 			
 			<div class="container ml-1">
@@ -57,7 +49,7 @@
 					</div>
 		
 					<div class="col-1 ">
-						<form method="post" action="{% url 'accept_friend' friend.pk %}">
+						<form method="post" action="{% url 'reject_friend' friend.pk %}">
 							{% csrf_token %}
 							<input class="btn btn-outline-danger btn-sm" type="submit" name="submit_mode" value="Reject">
 						</form>
@@ -68,38 +60,8 @@
 	</div>
 </div>
 
-	
 <div class="card-body">
-	<h2>Rejected Friends</h2>
-	{% for friend in friends_rejected %}
-		
-		<div class="container ml-1">
-			<div class="row justify-content-start no-gutters">
-				<div class="col-2">
-					<a href="{% url 'profile' user.pk %}">{{friend.user.username}}</a>
-				</div>
-
-				<div class="col-1">
-					<form method="post" action="{% url 'add_friend' friend.user.pk %}">
-						{% csrf_token %}
-						<input class="btn btn-outline-success btn-sm" type="submit" name="submit_mode" value="Add">
-					</form>		
-				</div>
-	
-				<div class="col-1 ">
-					<form method="post" action="{% url 'remove_friend' friend.user.pk %}">
-						{% csrf_token %}
-						<input class="btn btn-outline-danger btn-sm" type="submit" name="submit_mode" value="Remove">
-					</form>
-				</div>
-			</div>
-		</div>		
-	{% endfor %}
-</div>
-
-	
-<div class="card-body">
-	<h2>friends_outgoing_waiting_approval</h2>
+	<h2>Outgoing friend requests</h2>
 	{% for friend in friends_outgoing_waiting_approval %}
 		
 		<div class="container ml-1">
@@ -108,17 +70,10 @@
 					<a href="{% url 'profile' user.pk %}">{{friend.user.username}}</a>
 				</div>
 
-				<div class="col-1">
-					<form method="post" action="{% url 'add_friend' friend.user.pk %}">
-						{% csrf_token %}
-						<input class="btn btn-outline-success btn-sm" type="submit" name="submit_mode" value="Add">
-					</form>		
-				</div>
-	
 				<div class="col-1 ">
-					<form method="post" action="{% url 'remove_friend' friend.user.pk %}">
+					<form method="post" action="{% url 'reject_friend' friend.pk %}">
 						{% csrf_token %}
-						<input class="btn btn-outline-danger btn-sm" type="submit" name="submit_mode" value="Remove">
+						<input class="btn btn-outline-danger btn-sm" type="submit" name="submit_mode" value="Reject Request">
 					</form>
 				</div>
 			</div>

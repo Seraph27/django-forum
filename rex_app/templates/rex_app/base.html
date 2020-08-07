@@ -35,9 +35,8 @@
   </head>
 
   <body>
-
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    
+    <nav class="navbar navbar-expand-lg navbar-dark"  style="background-color: {{user.userattribute.get_background_color_display}};">
       <a class="nav-link btn btn-outline-info mr-4" href="{% url 'home' %}">Home</a>
 
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,7 +86,7 @@
 
 
         <form class="form-inline my-2 my-lg-0" action="{% url 'search' %}">
-          <input class="form-control mr-sm-2" type="text" id="searchbox" placeholder="Search..." name="searchbox">
+          <input class="form-control mr-sm-2" type="text" id="searchbox" style="width:280px;"placeholder="Search questions, answers, tags..." name="searchbox">
           <input class="btn btn-outline-info" type="submit" value="Submit">
         </form>          
       </div>

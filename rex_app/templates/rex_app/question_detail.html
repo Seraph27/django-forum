@@ -2,16 +2,20 @@
 
 	{% block content %}
 	{% load humanize %}
-	<head>
-		<title>Question {{question.pk}}</title>
-	</head>
-
 
 	<div class="card text-center bg-light">
-		<h3 class="bg-light">Question</h3>
-        <h4 class="text-right">&nbsp&nbsp&nbsp&nbsp<a href="{% url 'edit_question' question.pk %}" class="btn btn-outline-info btn-sm">Edit question</a></h4>			  			  	
-		{{question}} {{question.tag.all|join:','}}<br>
-		<p style="text-align:right">Asked by {{question.asked_by}}  <i class="{{user.userattribute.get_avatar_display}}"></i> {{question.date|naturaltime}}</p>
+		<h3 class="bg-light">{{question.title}}</h3>
+		{% if request.user == question.asked_by %}
+			<h4 class="text-right">&nbsp&nbsp&nbsp&nbsp<a href="{% url 'edit_question' question.pk %}" class="btn btn-outline-info btn-sm">Edit question</a></h4>	
+		{% endif %}		
+		<div class="row justify-content-center ">
+			<div class="col-sm-8 text-left">
+				<p>{{question.text|linebreaks}}</p>
+				<p>Tags: {{question.tag.all|join:','}}</p>
+			</div>
+		</div>
+		
+		<p style="text-align:right">Asked by <a href="{% url 'profile' question.asked_by.pk %}">  {{question.asked_by}} </a> <i class="{{question.asked_by.userattribute.get_avatar_display}}"></i> {{question.date|naturaltime}}</p>
 	</div>
 
 	<div class="card">
@@ -65,10 +69,10 @@
 
 					  	<div class="card-body bg-light">
 					    	<h5 class="card-title">{{answer.text}}</h5>
-							<p style="text-align:right">Answered by {{answer.answered_by}}  <i class="{{user.userattribute.get_avatar_display}}"></i> {{answer.date|naturaltime}}</p>
+							<p style="text-align:right">Answered by  <a href="{% url 'profile' answer.answered_by.pk %}">  {{answer.answered_by}}</a> <i class="{{answer.answered_by.userattribute.get_avatar_display}}"></i> {{answer.date|naturaltime}}</p>
 
 						    {% for comment in answer.comment_set.all %}
-								<p>{{comment}} --{{comment.commented_by}}  <i class="{{user.userattribute.get_avatar_display}}"></i> {{comment.date|naturaltime}}</p><br>
+								<p>{{comment}} <a href="{% url 'profile' comment.commented_by.pk %}">--{{comment.commented_by}}</a>  <i class="{{comment.commented_by.userattribute.get_avatar_display}}"></i> {{comment.date|naturaltime}}</p><br>
 							{% endfor %}
 							<a href="{% url 'create_comment' answer.pk %}" class="btn btn-outline-info">Make a new comment</a>	
 

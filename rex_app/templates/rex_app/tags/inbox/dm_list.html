@@ -1,0 +1,6 @@
+{% for name, dms in dm_list.items %}
+    <h1>{{name}}</h1>
+    {% for dm in dms %}
+        {{dm}}<br/>
+    {% endfor %}
+{% endfor %}

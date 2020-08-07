@@ -12,23 +12,22 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic.edit import FormMixin
 from django.views.generic.list import MultipleObjectMixin
 from .models import *
-from .reputation import upvote_allowed
+from .reputation import upvote_allowed, add_rep_for_question
 
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from django.db import IntegrityError
-
+from django.db.models import Q
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Fieldset, ButtonHolder
 
 
-class DirectMessageList(PermissionRequiredMixin, ListView):
-    permission_required = 'moderator'
+class DirectMessageList(LoginRequiredMixin, ListView):
     model = DirectMessage
 
     def get_queryset(self):
         qs = super().get_queryset() 
         
-        return qs.filter(from_user=self.request.user)
+        return qs.filter(Q(from_user=self.request.user) | Q(to_user=self.request.user))
 
 
 class DirectMessageForm(forms.ModelForm): 
@@ -99,7 +98,11 @@ def question_detail(request, pk):
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ['text', 'tag']
+        fields = ['title', 'text', 'tag']
+        widgets = {
+            'text': forms.Textarea(attrs={'cols':200, 'rows': 20}),
+
+        }
 
 
 @login_required
@@ -110,13 +113,12 @@ def create_question(request):
         form = QuestionForm(request.POST)
 
         if form.is_valid():
-            ua = get_object_or_404(UserAttribute, user=request.user)
+            add_rep_for_question(request.user)
             question = form.save(commit=False)
             question.asked_by = request.user
             question.save()
             form.save_m2m()
-            ua.reputation += 10
-            ua.save()
+
             messages.add_message(request, messages.SUCCESS, 'Question successfully created!')
             return redirect('question_detail', pk=question.pk)
 
@@ -140,6 +142,41 @@ class EditQuestion(UserPassesTestMixin, UpdateView):
     def get_success_url(self):
         messages.add_message(self.request, messages.SUCCESS, 'question successfully edited!')
         return reverse('question_detail', kwargs={'pk':self.get_object().pk}) 
+
+class TagForm(forms.ModelForm):
+    class Meta:
+        model = Tag
+        fields = ['text']
+
+@login_required
+def create_tag(request):
+
+    if request.method == 'POST':
+
+        form = TagForm(request.POST)
+
+        if form.is_valid():
+            tag = form.save(commit=False)
+            for t in Tag.objects.all():
+                if t.text == form.cleaned_data['text']:
+                    messages.add_message(request, messages.ERROR, 'Tag already exists!')
+                    return redirect('create_question')
+
+            tag.text = form.cleaned_data['text']
+            tag.save()
+            messages.add_message(request, messages.SUCCESS, 'Tag successfully created!')
+            return redirect('create_question')
+            
+
+        else:
+            messages.add_message(request, messages.ERROR, 'Terrible form D; ')
+
+    else:
+        form = TagForm()
+
+    return render(request, 'rex_app/create_tag.html', {    
+        'form': form,
+    }) 
 
 class UserAttributeForm(forms.ModelForm):
     class Meta:
@@ -191,10 +228,22 @@ def add_friend(request, pk):
 @login_required
 def remove_friend(request, pk):
 
-    friend_to_remove = get_object_or_404(FriendAdditionalDetail, pk=pk)
+    my_attributes = UserAttribute.objects.get(user__username=request.user)   #user (in UserAttribute) >> username (in User) use ris in userattribute
+    friend_to_remove = User.objects.get(pk=pk)
 
-    friend_to_remove.delete()
-    messages.add_message(request, messages.ERROR, 'Removed ' + friend_to_remove.user.username + ' as friend!')
+    FriendAdditionalDetail.objects.filter(user_attribute=my_attributes, user=friend_to_remove).delete()
+
+    messages.add_message(request, messages.ERROR, 'Removed ' + friend_to_remove.username + ' as friend!')
+
+    return redirect('friends_list')
+
+@login_required
+def reject_friend(request, pk):
+
+    friend_request = get_object_or_404(FriendAdditionalDetail, pk=pk)
+    friend_request.delete()
+
+    messages.add_message(request, messages.ERROR, 'Rejected ' + friend_request.user_attribute.user.username + '\'s friend request!')
 
     return redirect('friends_list')
 
@@ -218,13 +267,12 @@ def create_answer(request, question_pk):
         form = AnswerForm(request.POST)
 
         if form.is_valid():
-            ua = get_object_or_404(UserAttribute, user=request.user)
+            add_rep_for_question(request.user)
             answer = form.save(commit=False)
             answer.question = Question.objects.get(pk=question_pk)
             answer.answered_by = request.user
             answer.save()
-            ua.reputation += 10
-            ua.save()
+
             messages.add_message(request, messages.SUCCESS, 'Answer successfully created!')
             return redirect('question_detail', pk=question_pk)
 
@@ -281,13 +329,13 @@ def create_comment(request, answer_pk):
         form = CommentForm(request.POST)
 
         if form.is_valid():
-            ua = get_object_or_404(UserAttribute, user=request.user)    
+            
+            add_rep_for_question(request.user)
             comment = form.save(commit=False)
             comment.answer = Answer.objects.get(pk=answer_pk)
             comment.commented_by = request.user
             comment.save()
-            ua.reputation += 5
-            ua.save()
+
             messages.add_message(request, messages.SUCCESS, 'Comment successfully created!')            
 
             return redirect('question_detail', pk=comment.answer.question.pk)
@@ -309,9 +357,9 @@ def search(request):
 
         query = request.GET.get('searchbox')
 
-        search_results_for_question = Question.objects.filter(text__icontains=query)
+        search_results_for_question = Question.objects.filter(Q(text__icontains=query) | Q(title__icontains=query))
         search_results_for_answer = Answer.objects.filter(text__icontains=query)
-        search_results_for_tag = Tag.objects.filter(text=query)
+        search_results_for_tag = Tag.objects.filter(text__icontains=query)
 
         return render(request, 'rex_app/search.html', {
                 'search_results_for_question': search_results_for_question,
@@ -319,6 +367,19 @@ def search(request):
                 'search_results_for_tag':search_results_for_tag, 
                 'query': query,
             })
+
+@login_required
+def search_for_user(request):
+    if request.method == 'GET':
+        
+        query = request.GET.get('searchbox')
+        search_results_for_username = User.objects.filter(username__icontains=query)
+
+        return render(request, 'rex_app/search_for_user.html', {
+                'search_results_for_username': search_results_for_username,
+                'query': query,
+            })
+
 
 @login_required
 def upvote(request, answer_pk):
@@ -329,7 +390,8 @@ def upvote(request, answer_pk):
         if upvote_allowed(request.user):
             upvote.upvotes += 1
             upvote.save()
-    
+        else:
+            messages.add_message(request, messages.ERROR, 'Requires 20 reputation!')
     return redirect('question_detail', pk=upvote.question.pk)
 
 
@@ -338,9 +400,11 @@ def downvote(request, answer_pk):
     downvote = get_object_or_404(Answer, pk=answer_pk)
 
     if request.method == 'POST':
-        downvote.upvotes -= 1
-        downvote.save()
-    
+        if upvote_allowed(request.user):
+            downvote.upvotes -= 1
+            downvote.save()
+        else:
+            messages.add_message(request, messages.ERROR, 'Requires 20 reputation!')
     return redirect('question_detail', pk=downvote.question.pk)
 
 

@@ -1,0 +1,25 @@
+
+{% extends 'rex_app/base.html' %}
+
+{% block content %}
+
+    <div class="card">
+        <div class="card-header bg-light">
+        <h2 class="text-center">Results</h2>
+        </div>
+        <div class="card-body">
+            <p class="card-text text-center">
+                {% if not search_results_for_username %}
+                    NO RESULTS
+                {% endif %}
+            </p>
+    
+            <p class="card-text">
+                <h4 class="text-center">Users:</h4><br>
+                {% for user in search_results_for_username %}
+                    <a href="{% url 'profile' user.pk %}">{{user.username}}</a><br>
+                {% endfor %}
+    
+            </p>
+
+{% endblock %}

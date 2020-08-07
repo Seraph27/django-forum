@@ -17,7 +17,7 @@
 		<p class="card-text">
 			<h4 class="text-center">Search by question:</h4><br>
 			{% for question in search_results_for_question %}
-				<a href="{% url 'question_detail' question.pk %}">{{question}}</a><br>
+				<a href="{% url 'question_detail' question.pk %}">{{question.title}}</a><br>
 			{% endfor %}
 
 		</p>
