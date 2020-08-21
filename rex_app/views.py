@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404, reverse
 from django.contrib import messages
 from random import randint
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin,PermissionRequiredMixin
 from django.contrib.auth.models import User
@@ -12,13 +13,37 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic.edit import FormMixin
 from django.views.generic.list import MultipleObjectMixin
 from .models import *
-from .reputation import upvote_allowed, add_rep_for_question
+from .reputation import upvote_allowed, add_rep_for_question, get_colors_for_rep
 
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from django.db import IntegrityError
 from django.db.models import Q
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Fieldset, ButtonHolder
+
+
+
+
+def create_user(request):
+    form = UserCreationForm()
+
+    if request.method == 'POST':
+
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            # User.objects.create_user(username=form.cleaned_data['username'],
+            #                      email=form.cleaned_data['email'],
+            #                      password=form.cleaned_data['password'])
+            user = form.save() 
+            UserAttribute.objects.create(user=user)
+            # create a corresponding UserAttribute user.pk
+
+            return redirect('home')
+
+
+    return render(request,'rex_app/create_user.html', {
+            "form": form,    
+        }) 
 
 
 class DirectMessageList(LoginRequiredMixin, ListView):
@@ -72,7 +97,7 @@ class DirectMessageCreate(LoginRequiredMixin, CreateView):
 # Create your views here.
 @login_required
 def home_detail(request):
-    top_three_recent = Question.objects.all().order_by('-id')[:3]
+    top_three_recent = Question.objects.all().order_by('-date')[:3]
     current_user = UserAttribute.objects.get(user=request.user)
 
     return render(request,'rex_app/home.html', {
@@ -103,6 +128,7 @@ class QuestionForm(forms.ModelForm):
             'text': forms.Textarea(attrs={'cols':200, 'rows': 20}),
 
         }
+
 
 
 @login_required
@@ -183,11 +209,24 @@ class UserAttributeForm(forms.ModelForm):
         model = UserAttribute
         fields = ['background_color', 'avatar', 'birthday' ]
 
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs) 
+        self.fields['background_color'].choices = [
+            c for c in self.fields['background_color'].choices
+            if c[0] in get_colors_for_rep(user)]
+
+
 
 class EditUserAttributes(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
     model = UserAttribute
     form_class = UserAttributeForm
     success_message = "Settings updated"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def test_func(self):
         return self.request.user == self.get_object().user 
@@ -211,6 +250,10 @@ def friends_list(request):
         'friends_rejected': friends_rejected,
         'friends_outgoing_waiting_approval': friends_outgoing_waiting_approval,
     }) 
+
+class Shop(LoginRequiredMixin, DetailView): #profile
+    model = UserAttribute  
+    template_name = 'rex_app/shop.html' 
 
 @login_required
 def add_friend(request, pk):
@@ -418,6 +461,15 @@ def mark_accepted(request, answer_pk):
 
     return redirect('question_detail', pk=accept.question.pk)
 
+@login_required
+def show_conversation(request, other_user_pk):
+    other_user = get_object_or_404(User, pk=other_user_pk)
+    dms = DirectMessage.objects.filter(
+        (Q(from_user=request.user) & Q(to_user=other_user))
+    |   (Q(to_user=request.user) & Q(from_user=other_user) ))
+    return render(request, 'rex_app/show_conversation.html', {
+        'dms': dms,
+        })
 # @login_required
 # def settings(request):
 

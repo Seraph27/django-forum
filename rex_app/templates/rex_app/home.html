@@ -77,7 +77,7 @@
 	</div>	
 	<ul class="list-group list-group-flush">
 		{% for recent in recents %}
-			<li class="list-group-item"><a class="navbar-brand btn btn-link" href="{% url 'question_detail' recent.pk%}">{{recent}}</a><h5>Asked by: {{recent.asked_by}} {{recent.date|naturaltime}}</h5>
+			<li class="list-group-item"><a class="navbar-brand btn btn-link" href="{% url 'question_detail' recent.pk%}">{{recent|truncatechars:100}}</a><h5>Asked by: {{recent.asked_by}} {{recent.date|naturaltime}}</h5>
 			</li>
 		{% endfor %} 
 

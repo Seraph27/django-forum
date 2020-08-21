@@ -3,7 +3,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-
+    path('create_user', views.create_user, name='create_user'),
     path('home', views.home_detail, name='home'),
     path('question/create', views.create_question, name='create_question'),
     path('tag/create', views.create_tag, name='create_tag'),
@@ -25,7 +25,9 @@ urlpatterns = [
     path('friends/reject/<int:pk>', views.reject_friend, name='reject_friend'),
     path('dm/list', views.DirectMessageList.as_view(), name='direct_message_list'),
     path('dm/create', views.DirectMessageCreate.as_view(), name='direct_message_create'),
-    path('profile/<int:pk>', views.Profile.as_view(), name='profile')
+    path('dm/conversation/<int:other_user_pk>', views.show_conversation, name='show_conversation'),
+    path('profile/<int:pk>', views.Profile.as_view(), name='profile'),
+    path('shop/<int:pk>', views.Shop.as_view(), name='shop'),
     
 
 

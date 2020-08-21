@@ -68,7 +68,13 @@
           
           <li class="nav-item"><a class="nav-link" href="{% url 'direct_message_create' %}">Direct Messages</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'friends_list' %}">Friends</a></li>   
-          <li class="nav-item"><a class="nav-link" href="{% url 'profile' user.userattribute.pk %}">Profile</a></li>   
+          {% if user.is_authenticated %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'profile' user.userattribute.pk %}">Profile</a></li>  
+          {% endif %} 
+          {% if user.userattribute.is_shop_unlocked %}
+             <li class="nav-item"><a class="nav-link" href="{% url 'shop' user.userattribute.pk %}">Shop</a></li>   
+          {% endif %}
+         
 
            {% if user.is_authenticated %}
              {# <li class="nav-item active"><a class="nav-link">Color: {{ user.userattribute.get_background_color_display }}</a></li> #}

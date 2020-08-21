@@ -59,6 +59,9 @@ class UserAttribute(models.Model):
         related_name='friends_reverse',
         )
 
+    def is_shop_unlocked(self):
+        return True if self.reputation > 50 else False        
+
 class FriendStatus(models.IntegerChoices):
     AWAITING_APPROVAL = 1, 'AWAITING_APPROVAL'
     REJECTED = 2, 'REJECTED'

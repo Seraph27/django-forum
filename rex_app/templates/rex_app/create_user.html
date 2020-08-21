@@ -1,0 +1,16 @@
+{% extends 'rex_app/base.html' %}
+
+{% block content %}
+
+
+<div class="card">
+  <div class="card-body">
+  	<form method="post" action="{% url 'create_user' %}">
+        {{form.as_p}}
+        {% csrf_token %}
+        <input class="btn btn-outline-success btn-sm" type="submit" name="submit_mode" value="Create Account">
+    </form>
+
+  </div>
+</div>
+{% endblock %}

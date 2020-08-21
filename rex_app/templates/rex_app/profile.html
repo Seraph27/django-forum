@@ -1,5 +1,5 @@
 {% extends 'rex_app/base.html' %}
-
+{% load humanize %}
 
 
 {% block content %}
@@ -15,7 +15,12 @@
 		<h3>Birthday: {{object.birthday}}</h3>
 		<h3>Avatar: <i class="{{object.get_avatar_display}}"></i></h3>
 		<h3>Reputation: {{object.reputation}}</h3>
+		<h3>Asked Questions: </h3>
+		{% for question in object.user.question_set.all %}
+			<p><a href="{% url 'question_detail' question.pk %}" class="btn btn-outline-info btn-sm">{{question}}  </a> <b>  	 Asked: </b> {{question.date|naturaltime}}</p>
+		{% endfor %} 
 	</div>
+	
 	{% if object.user != request.user %}
 		<form method="post" action="{% url 'add_friend' object.user.pk %}">
 			{% csrf_token %}

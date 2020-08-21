@@ -1,5 +1,5 @@
-{% for question in questions %}
-    <a class="dropdown-item" href="{% url 'question_detail' question.pk %}">Question {{question.pk}}</a> 
-      {# auto generate url :) #}
+{% for question in questions reversed  %}
+    <a class="dropdown-item" href="{% url 'question_detail' question.pk %}">{{question|truncatechars:20}}</a> 
 
-  {% endfor %}  
+
+{% endfor %}  
