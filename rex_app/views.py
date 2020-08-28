@@ -31,13 +31,10 @@ def create_user(request):
 
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            # User.objects.create_user(username=form.cleaned_data['username'],
-            #                      email=form.cleaned_data['email'],
-            #                      password=form.cleaned_data['password'])
+
             user = form.save() 
             UserAttribute.objects.create(user=user)
-            # create a corresponding UserAttribute user.pk
-
+     
             return redirect('home')
 
 
@@ -215,6 +212,7 @@ class UserAttributeForm(forms.ModelForm):
         self.fields['background_color'].choices = [
             c for c in self.fields['background_color'].choices
             if c[0] in get_colors_for_rep(user)]
+        self.fields['avatar'].choices = [(avatar[0], avatar[2]) for avatar in user.userattribute.get_avatar_list() if avatar[3]]
 
 
 
@@ -251,9 +249,9 @@ def friends_list(request):
         'friends_outgoing_waiting_approval': friends_outgoing_waiting_approval,
     }) 
 
-class Shop(LoginRequiredMixin, DetailView): #profile
+class Achievements(LoginRequiredMixin, DetailView): #profile
     model = UserAttribute  
-    template_name = 'rex_app/shop.html' 
+    template_name = 'rex_app/achievements.html' 
 
 @login_required
 def add_friend(request, pk):

@@ -48,8 +48,8 @@ class DirectMessage(models.Model):
 
 class UserAttribute(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
-    background_color = models.IntegerField(choices=Colors.choices)    
-    avatar = models.CharField(max_length=99999, choices=Avatars.choices)
+    background_color = models.IntegerField(choices=Colors.choices, default=Colors.DARK)    
+    avatar = models.CharField(max_length=99999, choices=Avatars.choices, default=Avatars.PX)
     birthday=models.DateField(null=True, blank=True)
     reputation = models.IntegerField(default=0)
     friends = models.ManyToManyField(
@@ -60,7 +60,15 @@ class UserAttribute(models.Model):
         )
 
     def is_shop_unlocked(self):
-        return True if self.reputation > 50 else False        
+        return True if self.reputation > 50 else False  
+              
+    def get_avatar_list(self):
+        return [(Avatars.PX, 'PX avatar','fab fa-500px', True ),
+                (Avatars.ANGRY, 'Angry avatar', 'far fa-angry', self.reputation > 25),
+                (Avatars.atom, 'Atom avatar',  'fas fa-atom', self.reputation > 50)]
+        
+        
+
 
 class FriendStatus(models.IntegerChoices):
     AWAITING_APPROVAL = 1, 'AWAITING_APPROVAL'

@@ -27,7 +27,7 @@ urlpatterns = [
     path('dm/create', views.DirectMessageCreate.as_view(), name='direct_message_create'),
     path('dm/conversation/<int:other_user_pk>', views.show_conversation, name='show_conversation'),
     path('profile/<int:pk>', views.Profile.as_view(), name='profile'),
-    path('shop/<int:pk>', views.Shop.as_view(), name='shop'),
+    path('achievements/<int:pk>', views.Achievements.as_view(), name='achievements'),
     
 
 

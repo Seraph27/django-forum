@@ -16,9 +16,17 @@ def add_rep_for_question(user):
 def get_colors_for_rep(user):
     # print('\n'.join(dir(Colors.BLUE)))
     # print(Colors.BLUE[0],Colors.BLUE[1])
-    if user.userattribute.reputation > 20:
-        
+    if user.userattribute.reputation > 20:  
         return [Colors.BLUE]
+    elif user.userattribute.reputation > 50: 
+        return [
+            Colors.DARK,
+            Colors.BLUE]
     else:
-        return [Colors.DARK]
+        return [
+            Colors.DARK,
+            Colors.BLUE,
+            Colors.GREEN]
   
+
+

@@ -1,0 +1,31 @@
+{% extends 'rex_app/base.html' %}
+
+{% block content %}
+
+
+<div class="card">
+  <div class="card-header text-center">
+    <h2 class="text-center">Achievements</h2>
+  </div>
+
+<div class="row">
+  {% for avatar, name, css, is_unlocked in user.userattribute.get_avatar_list %}
+  <div class="col-sm-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">{{name}}</h5>
+        <p class="card-text"><i class="{{css}}"></i></p>
+        {% if is_unlocked %}
+          <a href="#" class="btn btn-primary">Unlocked</a>
+        {% else %}
+          <a href="#" class="btn btn-warning">Locked</a>
+        {% endif %}      
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+ 
+{% endblock %}
+
+
+	

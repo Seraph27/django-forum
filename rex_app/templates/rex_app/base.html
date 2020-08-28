@@ -72,7 +72,7 @@
             <li class="nav-item"><a class="nav-link" href="{% url 'profile' user.userattribute.pk %}">Profile</a></li>  
           {% endif %} 
           {% if user.userattribute.is_shop_unlocked %}
-             <li class="nav-item"><a class="nav-link" href="{% url 'shop' user.userattribute.pk %}">Shop</a></li>   
+             <li class="nav-item"><a class="nav-link" href="{% url 'achievements' user.userattribute.pk %}">Achievements</a></li>   
           {% endif %}
          
 
@@ -90,11 +90,12 @@
             <li class="nav-item active"><a class="nav-link mr-sm-2">Logged in as: {{ user.get_username }} <i class="{{user.userattribute.get_avatar_display}}"></i></a></li>
           {% endif %}
 
-
+        {% if user.is_authenticated %}
         <form class="form-inline my-2 my-lg-0" action="{% url 'search' %}">
           <input class="form-control mr-sm-2" type="text" id="searchbox" style="width:280px;"placeholder="Search questions, answers, tags..." name="searchbox">
           <input class="btn btn-outline-info" type="submit" value="Submit">
-        </form>          
+        </form> 
+        {% endif %}   
       </div>
     </nav>
 
