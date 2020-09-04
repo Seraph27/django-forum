@@ -1,1 +1,1 @@
-web: gunicorn rex.wsgi --log-file -
+web: gunicorn rex.wsgi
