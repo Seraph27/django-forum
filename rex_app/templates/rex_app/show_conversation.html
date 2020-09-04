@@ -1,18 +1,14 @@
 {% extends 'rex_app/base.html' %}
 
 {% block content %}
-
+{% load inbox_tags %}
 
 <div class="card">
-  <div class="card-header text-center">
-    <h2 class="text-center">dms</h2>
-  </div>
-
-  {% for dm in dms %}
-    <p>{{dm}}</p>
-  {% endfor %}
+	<div class="card-header text-center">
+		<h2 class="text-center">DMS</h2>
 
 </div>
-
-{% endblock %}
-
+{% for dm in dms %}
+    {{dm}}</br>
+{% endfor %}
+{% endblock content %}

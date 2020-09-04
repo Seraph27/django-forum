@@ -6,12 +6,10 @@
 <div class="card">
 	<div class="card-header text-center">
 		<h2 class="text-center">Users</h2>
-	{% comment %} </div>
-		<a href="{% url 'direct_message_list' %}" class="btn btn-outline-info">Inbox</a>	
-	</div> {% endcomment %}
 
 </div>
-{% show_dms object_list request.user %}
-
-
+<p>{{DirectMessage.from_user}}</p>
+{% for user in user_set %}
+	<a class="btn btn-outline-success btn-sm my-2 " href="{% url 'show_conversation' user.pk %}">{{user.username}}</a>
+{% endfor %}
 {% endblock content %}

@@ -1,5 +1,5 @@
 {% for name, dms in dm_list.items %}
-    <a href="{% url 'direct_message_list' %}" class="btn btn-outline-info"><h1>{{name}}</h1></a>
+    <a href="{% url 'inbox' %}" class="btn btn-outline-info"><h1>{{name}}</h1></a>
     {% for dm in dms %}
         {{dm}}<br/>
     {% endfor %}

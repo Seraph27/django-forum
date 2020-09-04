@@ -13,8 +13,6 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic.edit import FormMixin
 from django.views.generic.list import MultipleObjectMixin
 from .models import *
-from .reputation import upvote_allowed, add_rep_for_question, get_colors_for_rep
-
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from django.db import IntegrityError
 from django.db.models import Q
@@ -22,7 +20,9 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Fieldset, ButtonHolder
 
 
-
+########################################################################
+# Creating users
+########################################################################
 
 def create_user(request):
     form = UserCreationForm()
@@ -31,30 +31,44 @@ def create_user(request):
 
         form = UserCreationForm(request.POST)
         if form.is_valid():
-
             user = form.save() 
             UserAttribute.objects.create(user=user)
-     
             return redirect('home')
-
 
     return render(request,'rex_app/create_user.html', {
             "form": form,    
         }) 
 
 
-class DirectMessageList(LoginRequiredMixin, ListView):
-    model = DirectMessage
+########################################################################
+# Direct messages
+########################################################################
 
-    def get_queryset(self):
-        qs = super().get_queryset() 
-        
-        return qs.filter(Q(from_user=self.request.user) | Q(to_user=self.request.user))
+@login_required
+def show_conversation(request, other_user_pk):
+    other_user = get_object_or_404(User, pk=other_user_pk)
+    dms = DirectMessage.objects.filter(
+        (Q(from_user=request.user) & Q(to_user=other_user))
+    |   (Q(to_user=request.user) & Q(from_user=other_user) ))
+    return render(request, 'rex_app/show_conversation.html', {
+        'dms': dms,
+        })
 
+@login_required
+def inbox(request):
+    dms = DirectMessage.objects.filter(Q(from_user=request.user) | Q(to_user=request.user))
+    user_set = set()
+    for dm in dms:
+        if request.user == dm.from_user:
+            user_set.add(dm.to_user)
+        else:
+            user_set.add(dm.from_user)
+    return render(request, 'rex_app/inbox.html', {
+        'user_set': user_set,
+        })
 
 class DirectMessageForm(forms.ModelForm): 
     class Meta:
-
         model = DirectMessage
         fields = ['to_user', 'text']
 
@@ -64,44 +78,36 @@ class DirectMessageForm(forms.ModelForm):
         self.helper.form_method = 'post'
         self.helper.form_action = reverse('direct_message_create')
         self.helper.add_input(Submit('submit', 'Submit', css_class='btn-warning')) 
-        # self.helper.layout = Layout(
-        #     Fieldset(
-        #         'TITLE REX',
-        #         'to_user',
-        #         'text',
-        #     ),
-        #     ButtonHolder(
-        #         Submit('submit', 'Submit', css_class='button white')
-        #     )
-        # )
 
 
 class DirectMessageCreate(LoginRequiredMixin, CreateView):
     model = DirectMessage
     form_class = DirectMessageForm
-    # if dont specify form_class then fields is required
-    # fields = ['from_user', 'to_user', 'text']
 
     def form_valid(self, form):
-    # This method is called when valid form data has been POSTed.
-    # It should return an HttpResponse.
         form.instance.from_user = self.request.user
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('direct_message_list')
+        return reverse('inbox')
 
-# Create your views here.
+########################################################################
+# Homepage
+########################################################################
+
 @login_required
 def home_detail(request):
     top_three_recent = Question.objects.all().order_by('-date')[:3]
     current_user = UserAttribute.objects.get(user=request.user)
 
     return render(request,'rex_app/home.html', {
-        # 'python_tag':Tag.objects.get(text='python'),
         'recents': top_three_recent,
         'questions': Question.objects.all(),     
         }) 
+
+########################################################################
+# Questions
+########################################################################
 
 @login_required
 def question_detail(request, pk):
@@ -115,28 +121,25 @@ def question_detail(request, pk):
 
         }) 
 
-# forms.BaseForm -> (forms.Form, forms.ModelForm)
-
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
         fields = ['title', 'text', 'tag']
         widgets = {
             'text': forms.Textarea(attrs={'cols':200, 'rows': 20}),
-
         }
-
-
 
 @login_required
 def create_question(request):
+
+    form = QuestionForm()
 
     if request.method == 'POST':
 
         form = QuestionForm(request.POST)
 
         if form.is_valid():
-            add_rep_for_question(request.user)
+            request.user.userattribute.add_rep_for_question()
             question = form.save(commit=False)
             question.asked_by = request.user
             question.save()
@@ -147,9 +150,6 @@ def create_question(request):
 
         else:
             messages.add_message(request, messages.ERROR, 'Terrible form D; ')
-
-    else:
-        form = QuestionForm()
 
     return render(request, 'rex_app/create_question.html', {    
         'form': form,
@@ -163,8 +163,101 @@ class EditQuestion(UserPassesTestMixin, UpdateView):
         return self.request.user == self.get_object().asked_by 
 
     def get_success_url(self):
-        messages.add_message(self.request, messages.SUCCESS, 'question successfully edited!')
+        messages.add_message(self.request, messages.SUCCESS, 'Question successfully edited!')
         return reverse('question_detail', kwargs={'pk':self.get_object().pk}) 
+
+########################################################################
+# Answer
+########################################################################
+
+@login_required
+def create_answer(request, question_pk):
+    form = AnswerForm()
+    if request.method == 'POST':
+
+        form = AnswerForm(request.POST)
+
+        if form.is_valid():
+            request.user.userattribute.add_rep_for_question()
+            answer = form.save(commit=False)
+            answer.question = Question.objects.get(pk=question_pk)
+            answer.answered_by = request.user
+            answer.save()
+
+            messages.add_message(request, messages.SUCCESS, 'Answer successfully created!')
+            return redirect('question_detail', pk=question_pk)
+
+        else:
+            messages.add_message(request, messages.ERROR, 'Terrible form D; ')
+
+    return render(request, 'rex_app/create_answer.html', {
+        'form': form,
+        'question_pk': question_pk,
+    }) 
+
+@login_required
+def edit_answer(request, answer_pk):
+
+    answer = get_object_or_404(Answer, pk=answer_pk)
+    form = AnswerForm(instance=answer)     
+
+    if request.method == 'POST':
+
+        form = AnswerForm(request.POST,instance=answer)
+
+        if form.is_valid() and request.user == answer.answered_by:
+            form.save()
+            messages.add_message(request, messages.SUCCESS, 'Answer successfully edited!')
+            return redirect('question_detail', pk=answer.question.pk)
+
+        else:
+            messages.add_message(request, messages.ERROR, 'dont you dare change someone elses answer')
+           
+    return render(request, 'rex_app/edit_answer.html', {
+        'form': form,
+        'answer_pk': answer_pk,       
+    })        
+
+########################################################################
+# Comment
+########################################################################
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['text']
+
+@login_required
+def create_comment(request, answer_pk):
+
+    answer = get_object_or_404(Answer, pk=answer_pk)
+    form = CommentForm()
+
+    if request.method == 'POST':
+
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            
+            request.user.userattribute.add_rep_for_question()
+            comment = form.save(commit=False)
+            comment.answer = answer
+            comment.commented_by = request.user
+            comment.save()
+            messages.add_message(request, messages.SUCCESS, 'Comment successfully created!')            
+
+            return redirect('question_detail', pk=comment.answer.question.pk)
+
+        else:
+            messages.add_message(request, messages.ERROR, 'Terrible form D; ')
+
+    return render(request, 'rex_app/create_comment.html', {
+        'form': form,
+        'answer_pk': answer_pk,
+    }) 
+
+########################################################################
+# Tags
+########################################################################
 
 class TagForm(forms.ModelForm):
     class Meta:
@@ -174,32 +267,26 @@ class TagForm(forms.ModelForm):
 @login_required
 def create_tag(request):
 
+    form = TagForm()
+
     if request.method == 'POST':
 
         form = TagForm(request.POST)
-
         if form.is_valid():
-            tag = form.save(commit=False)
-            for t in Tag.objects.all():
-                if t.text == form.cleaned_data['text']:
-                    messages.add_message(request, messages.ERROR, 'Tag already exists!')
-                    return redirect('create_question')
-
-            tag.text = form.cleaned_data['text']
-            tag.save()
+            form.save()
             messages.add_message(request, messages.SUCCESS, 'Tag successfully created!')
             return redirect('create_question')
             
-
         else:
             messages.add_message(request, messages.ERROR, 'Terrible form D; ')
-
-    else:
-        form = TagForm()
 
     return render(request, 'rex_app/create_tag.html', {    
         'form': form,
     }) 
+
+########################################################################
+# UserAttributes
+########################################################################
 
 class UserAttributeForm(forms.ModelForm):
     class Meta:
@@ -209,12 +296,8 @@ class UserAttributeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs) 
-        self.fields['background_color'].choices = [
-            c for c in self.fields['background_color'].choices
-            if c[0] in get_colors_for_rep(user)]
+        self.fields['background_color'].choices = [(color[0], color[2]) for color in user.userattribute.get_color_list() if color[3]]
         self.fields['avatar'].choices = [(avatar[0], avatar[2]) for avatar in user.userattribute.get_avatar_list() if avatar[3]]
-
-
 
 class EditUserAttributes(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
     model = UserAttribute
@@ -232,9 +315,18 @@ class EditUserAttributes(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
     def get_success_url(self):
         return reverse('settings', kwargs={'pk':self.get_object().pk}) 
 
-class Profile(LoginRequiredMixin, DetailView): #profile
+class Profile(LoginRequiredMixin, DetailView):
     model = UserAttribute  
     template_name = 'rex_app/profile.html' 
+
+
+class Achievements(LoginRequiredMixin, DetailView):
+    model = UserAttribute  
+    template_name = 'rex_app/achievements.html' 
+
+########################################################################
+# Friends
+########################################################################
 
 @login_required
 def friends_list(request):
@@ -249,28 +341,26 @@ def friends_list(request):
         'friends_outgoing_waiting_approval': friends_outgoing_waiting_approval,
     }) 
 
-class Achievements(LoginRequiredMixin, DetailView): #profile
-    model = UserAttribute  
-    template_name = 'rex_app/achievements.html' 
-
 @login_required
 def add_friend(request, pk):
 
-    my_attributes = UserAttribute.objects.get(user__username=request.user)   #user (in UserAttribute) >> username (in User) use ris in userattribute
-    friend_to_add = User.objects.get(pk=pk)
-#check pair in friendadditional or don't create
+    my_attributes = request.user.userattribute  
+    friend_to_add = get_object_or_404(User, pk=pk)
+
     try: 
         FriendAdditionalDetail.objects.create(
             user_attribute=my_attributes, user=friend_to_add, status=FriendStatus.AWAITING_APPROVAL)
     except IntegrityError:
         messages.add_message(request, messages.ERROR, 'Cannot add friend: you already added ' + friend_to_add.username + ' as friend!')
+    except ValidationError as e:
+        messages.add_message(request, messages.ERROR, 'Error: '+e)
     return redirect('friends_list')
 
 @login_required
 def remove_friend(request, pk):
 
-    my_attributes = UserAttribute.objects.get(user__username=request.user)   #user (in UserAttribute) >> username (in User) use ris in userattribute
-    friend_to_remove = User.objects.get(pk=pk)
+    my_attributes = request.user.userattribute  
+    friend_to_remove = get_object_or_404(User, pk=pk)
 
     FriendAdditionalDetail.objects.filter(user_attribute=my_attributes, user=friend_to_remove).delete()
 
@@ -301,102 +391,19 @@ class AnswerForm(forms.ModelForm):
         model = Answer
         fields = ['text']
 
-@login_required
-def create_answer(request, question_pk):
-    if request.method == 'POST':
+########################################################################
+# Search
+########################################################################
 
-        form = AnswerForm(request.POST)
-
-        if form.is_valid():
-            add_rep_for_question(request.user)
-            answer = form.save(commit=False)
-            answer.question = Question.objects.get(pk=question_pk)
-            answer.answered_by = request.user
-            answer.save()
-
-            messages.add_message(request, messages.SUCCESS, 'Answer successfully created!')
-            return redirect('question_detail', pk=question_pk)
-
-
-        else:
-            messages.add_message(request, messages.ERROR, 'Terrible form D; ')
-
-
-    else:
-        form = AnswerForm()
-
-    return render(request, 'rex_app/create_answer.html', {
-        'form': form,
-        'question_pk': question_pk,
-    }) 
-
-@login_required
-def edit_answer(request, answer_pk):
-
-    answer = get_object_or_404(Answer, pk=answer_pk)
-
-    if request.method == 'POST':
-
-        form = AnswerForm(request.POST)
-
-        if form.is_valid() and request.user == answer.answered_by:
-
-            answer.text = form.cleaned_data['text']
-            answer.save()
-            messages.add_message(request, messages.SUCCESS, 'Answer successfully edited!')
-            return redirect('question_detail', pk=answer.question.pk)
-
-        else:
-            messages.add_message(request, messages.ERROR, 'dont you dare change someone elses answer')
-
-    else:
-        form = AnswerForm(instance=answer)        
-    return render(request, 'rex_app/edit_answer.html', {
-        'form': form,
-        'answer_pk': answer_pk,       
-
-    })        
-
-class CommentForm(forms.ModelForm):
-    class Meta:
-        model = Comment
-        fields = ['text']
-
-
-@login_required
-def create_comment(request, answer_pk):
-    if request.method == 'POST':
-
-        form = CommentForm(request.POST)
-
-        if form.is_valid():
-            
-            add_rep_for_question(request.user)
-            comment = form.save(commit=False)
-            comment.answer = Answer.objects.get(pk=answer_pk)
-            comment.commented_by = request.user
-            comment.save()
-
-            messages.add_message(request, messages.SUCCESS, 'Comment successfully created!')            
-
-            return redirect('question_detail', pk=comment.answer.question.pk)
-
-        else:
-            messages.add_message(request, messages.ERROR, 'Terrible form D; ')
-
-    else:
-        form = CommentForm()
-
-    return render(request, 'rex_app/create_comment.html', {
-        'form': form,
-        'answer_pk': answer_pk,
-    }) 
 
 @login_required
 def search(request):
+    if 'searchbox' not in request.GET:
+        return render(request, 'rex_app/search.html', {})
+
     if request.method == 'GET':
 
-        query = request.GET.get('searchbox')
+        query = request.GET.get('searchbox', '')
 
         search_results_for_question = Question.objects.filter(Q(text__icontains=query) | Q(title__icontains=query))
         search_results_for_answer = Answer.objects.filter(text__icontains=query)
@@ -411,6 +418,9 @@ def search(request):
 
 @login_required
 def search_for_user(request):
+    if 'searchbox' not in request.GET:
+        return render(request, 'rex_app/search_for_user.html', {})
+
     if request.method == 'GET':
         
         query = request.GET.get('searchbox')
@@ -421,6 +431,9 @@ def search_for_user(request):
                 'query': query,
             })
 
+########################################################################
+# Voting
+########################################################################
 
 @login_required
 def upvote(request, answer_pk):
@@ -428,11 +441,12 @@ def upvote(request, answer_pk):
     upvote = get_object_or_404(Answer, pk=answer_pk)
 
     if request.method == 'POST':
-        if upvote_allowed(request.user):
+        if UserAttribute.is_upvote_allowed(request.user.userattribute):
             upvote.upvotes += 1
             upvote.save()
         else:
             messages.add_message(request, messages.ERROR, 'Requires 20 reputation!')
+
     return redirect('question_detail', pk=upvote.question.pk)
 
 
@@ -441,7 +455,7 @@ def downvote(request, answer_pk):
     downvote = get_object_or_404(Answer, pk=answer_pk)
 
     if request.method == 'POST':
-        if upvote_allowed(request.user):
+        if UserAttribute.is_upvote_allowed(request.user.userattribute):
             downvote.upvotes -= 1
             downvote.save()
         else:
@@ -458,57 +472,3 @@ def mark_accepted(request, answer_pk):
         accept.save()
 
     return redirect('question_detail', pk=accept.question.pk)
-
-@login_required
-def show_conversation(request, other_user_pk):
-    other_user = get_object_or_404(User, pk=other_user_pk)
-    dms = DirectMessage.objects.filter(
-        (Q(from_user=request.user) & Q(to_user=other_user))
-    |   (Q(to_user=request.user) & Q(from_user=other_user) ))
-    return render(request, 'rex_app/show_conversation.html', {
-        'dms': dms,
-        })
-# @login_required
-# def settings(request):
-
-#     return render(request, 'rex_app/settings.html', {
-    
-#     }) 
-
-# class ChangeColorForm(forms.ModelForm):
-#     class Meta:
-#         model = UserAttribute
-#         fields = ['background_color']
-
-
-# @login_required
-# def change_color(request, user_pk):
-
-#     user = get_object_or_404(User, pk=user_pk)  
-#     ua = UserAttribute.objects.get(user=user)
-    
-#     if request.method == 'POST':
-
-#         form = ChangeColorForm(request.POST)
-
-#         if form.is_valid():
-
-            
-#             ua.background_color = form.cleaned_data['background_color']
-#             ua.save()
-
-#             messages.add_message(request, messages.SUCCESS, 'Background color successfully updated!')
-#             return redirect('settings', user_pk=user_pk)
-
-#         else:
-#             messages.add_message(request, messages.ERROR, 'Terrible form D; ')
-
-#     else:
-#         form = ChangeColorForm(instance=ua)
-
-#     return render(request, 'rex_app/change_color.html', {   
-#         'form': form,
-#     })  
-
-
-

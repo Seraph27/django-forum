@@ -1,29 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import User
-# Create your models here.
-
-# TODO User field for Answer and Comment, update views, render users that answered questions etc
 
 class GlobalPermissions(models.Model):
     class Meta:
         managed = False
-
         default_permissions = ()
-
         permissions = (
             ('moderator', 'Can moderate'),
             ('voter', 'Can upvote/downvote'),
-            ('', ''),
-            # ('', ''),
-
         )
 
 class Colors(models.IntegerChoices):
     DARK = 1, '#212529'
     BLUE = 2, '#001442'
     GREEN = 3, '#00321b'
-
-    
 
 class Avatars(models.TextChoices):
     PX = 1, 'fab fa-500px'
@@ -37,6 +27,7 @@ class Avatars(models.TextChoices):
     mapleleaf = 9, 'fab fa-canadian-maple-leaf'
     carcrash = 10, 'fas fa-car-crash'
 
+
 class DirectMessage(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='from_user_reverse')
     to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='to_user_reverse')
@@ -45,6 +36,7 @@ class DirectMessage(models.Model):
 
     def __str__(self):
     	return str(self.from_user)+'>'+str(self.to_user)+' '+self.text
+
 
 class UserAttribute(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
@@ -58,6 +50,14 @@ class UserAttribute(models.Model):
         through_fields=('user_attribute', 'user'),
         related_name='friends_reverse',
         )
+    def is_upvote_allowed(self):                        
+        return True if self.reputation > 20 else False
+
+    def add_rep_for_question(self):
+        self.reputation += 10
+        self.save()
+    
+
 
     def is_shop_unlocked(self):
         return True if self.reputation > 50 else False  
@@ -66,9 +66,12 @@ class UserAttribute(models.Model):
         return [(Avatars.PX, 'PX avatar','fab fa-500px', True ),
                 (Avatars.ANGRY, 'Angry avatar', 'far fa-angry', self.reputation > 25),
                 (Avatars.atom, 'Atom avatar',  'fas fa-atom', self.reputation > 50)]
-        
-        
 
+    def get_color_list(self):
+        return [(Colors.BLUE, 'Blue', '#001442', True), 
+                (Colors.DARK, 'Dark', '#212529', self.reputation > 25),
+                (Colors.GREEN, 'Green', '#00321b', self.reputation > 50),]
+    
 
 class FriendStatus(models.IntegerChoices):
     AWAITING_APPROVAL = 1, 'AWAITING_APPROVAL'
@@ -83,13 +86,12 @@ class FriendAdditionalDetail(models.Model):
     status = models.IntegerField(choices=FriendStatus.choices)    
 
     def save(self, *args, **kwargs):
-
         if self.user_attribute.user == self.user:
-            raise ValidationError('chill')
+            raise ValidationError('Can\'t become friends with yourself.')
         super().save(*args, **kwargs)
 
 class Tag(models.Model):
-    text = models.CharField(max_length=20)
+    text = models.CharField(max_length=20, unique=True)
     
     def __str__(self):
         return self.text[:200]

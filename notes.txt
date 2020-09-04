@@ -1,5 +1,6 @@
-profile list questions someone asked ok
 
-nav bar question dropdown
+fix inbox, currently showing all conversations
 
-fix dms
+
+getrid of rep file and put them in models
+
