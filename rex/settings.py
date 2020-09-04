@@ -25,7 +25,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'b0zapggk37(0b8%$s))r3%3^!owtqtc82n*4x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool( os.environ.get('DJANGO_DEBUG', True) )
 
-ALLOWED_HOSTS = ['https://seraph1007.herokuapp.com/', '127.0.0.1'] #add something
+ALLOWED_HOSTS = ['seraph1007.herokuapp.com', '127.0.0.1'] #add something
 
 LOGIN_REDIRECT_URL = '/rex/question/1'
 
