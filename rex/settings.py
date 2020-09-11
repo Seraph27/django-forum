@@ -21,9 +21,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'b0zapggk37(0b8%$s))r3%3^!owtqtc82n*4xez1k0eltw&yx5')
-
+SECURE_SSL_REDIRECT = bool(os.environ.get('DJANGO_SECURE_SETTINGS', False))
+SESSION_COOKIE_SECURE = bool(os.environ.get('DJANGO_SECURE_SETTINGS', False))
+CSRF_COOKIE_SECURE = bool(os.environ.get('DJANGO_SECURE_SETTINGS', False))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool( os.environ.get('DJANGO_DEBUG', True) )
+
+if not DEBUG:
+    print('not running in debug')
 
 ALLOWED_HOSTS = ['seraph1007.herokuapp.com', '127.0.0.1'] #add something
 
