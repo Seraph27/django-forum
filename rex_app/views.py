@@ -160,7 +160,7 @@ class EditQuestion(UserPassesTestMixin, UpdateView):
     form_class = QuestionForm
 
     def test_func(self):
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return False
         return self.request.user == self.get_object().asked_by 
 
@@ -312,7 +312,7 @@ class EditUserAttributes(UserPassesTestMixin, SuccessMessageMixin, UpdateView):
         return kwargs
 
     def test_func(self):
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return False
         return self.request.user == self.get_object().user 
 
