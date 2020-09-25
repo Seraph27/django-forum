@@ -1,6 +1,7 @@
+write report on website or essay 
 
-fix inbox, currently showing all conversations
+way for guests to see the website
 
+home view as login page 
 
-getrid of rep file and put them in models
-
+achievements
